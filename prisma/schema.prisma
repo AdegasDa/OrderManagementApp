@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Client {
+  id        String       @id @default(cuid())
+  name      String
+  phone     String
+  source    String       @default("STORE")
+  orders    Order[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@map("clients")
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  salePrice   Float
+  orders      Order[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("products")
+}
+
+model PaymentType {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  orders    Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("payment_types")
+}
+
+model OrderStatus {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  color     String   @default("#6b7280")
+  orders    Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("order_statuses")
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  orderNumber   Int         @unique
+  orderDate     DateTime
+  client        Client      @relation(fields: [clientId], references: [id])
+  clientId      String
+  product       Product     @relation(fields: [productId], references: [id])
+  productId     String
+  paymentType   PaymentType @relation(fields: [paymentTypeId], references: [id])
+  paymentTypeId String
+  status        OrderStatus @relation(fields: [statusId], references: [id])
+  statusId      String
+  totalValue    Float
+  advanceAmount Float       @default(0)
+  deliveryFee   Float       @default(0)
+  notes         String?
+  deliveryNotes String?
+  photos        OrderPhoto[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@map("orders")
+}
+
+model OrderPhoto {
+  id        String   @id @default(cuid())
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId   String
+  filePath  String
+  createdAt DateTime @default(now())
+
+  @@map("order_photos")
+}

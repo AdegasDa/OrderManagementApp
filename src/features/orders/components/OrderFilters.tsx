@@ -12,7 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { OrderStatus } from "@/generated/prisma";
+import type { OrderStatus } from "@/lib/types";
 
 const SORT_OPTIONS = [
   { value: "date-desc",   label: "Data — mais recente" },

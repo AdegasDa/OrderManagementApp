@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
 import { getOrdersByDate } from "@/features/orders/actions";
-import type { Client, Product, OrderStatus } from "@/generated/prisma";
+import type { Client, Product, OrderStatus } from "@/lib/types";
 
 type DayOrder = {
   id: string; orderNumber: number;
@@ -46,7 +46,7 @@ export function DayOrders({ selectedDate }: Props) {
       )}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {orders.map((o) => (
-          <Link key={o.id} href={`/orders/${o.id}`}>
+          <Link key={o.id} href={`/orders?id=${o.id}`}>
             <Card className="hover:border-primary transition-colors cursor-pointer">
               <CardContent className="p-4 space-y-2">
                 <div className="flex items-center justify-between">

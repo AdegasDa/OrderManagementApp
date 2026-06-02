@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { paymentTypeSchema, type PaymentTypeFormValues } from "../schema";
 import { createPaymentType, updatePaymentType, deletePaymentType } from "../actions";
-import type { PaymentType } from "@/generated/prisma";
+import type { PaymentType } from "@/lib/types";
 
 export function PaymentTypeList({ paymentTypes: initial }: { paymentTypes: PaymentType[] }) {
   const [items, setItems] = useState(initial);

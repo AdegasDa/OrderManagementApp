@@ -8,14 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { deleteOrder } from "../actions";
-import type { Client, Product, PaymentType, OrderStatus, OrderPhoto } from "@/generated/prisma";
-
-type OrderWithRelations = {
-  id: string; orderNumber: number; orderDate: Date;
-  totalValue: number; advanceAmount: number; deliveryFee: number;
-  client: Client; product: Product; paymentType: PaymentType;
-  status: OrderStatus; photos: OrderPhoto[];
-};
+import type { OrderWithRelations } from "@/lib/types";
 
 export function OrderList({ orders }: { orders: OrderWithRelations[] }) {
   const router = useRouter();
@@ -61,7 +54,7 @@ export function OrderList({ orders }: { orders: OrderWithRelations[] }) {
               <TableRow
                 key={o.id}
                 className="cursor-pointer hover:bg-muted/50"
-                onClick={() => router.push(`/orders/${o.id}`)}
+                onClick={() => router.push(`/orders?id=${o.id}`)}
               >
                 <TableCell className="font-mono font-semibold">#{o.orderNumber}</TableCell>
                 <TableCell className="whitespace-nowrap">{formatDate(o.orderDate)}</TableCell>

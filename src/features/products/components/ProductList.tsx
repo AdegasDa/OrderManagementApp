@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { formatCurrency } from "@/lib/utils";
 import { ProductForm } from "./ProductForm";
 import { deleteProduct } from "../actions";
-import type { Product } from "@/generated/prisma";
+import type { Product } from "@/lib/types";
 
 export function ProductList({ products: initial }: { products: Product[] }) {
   const [products, setProducts] = useState(initial);

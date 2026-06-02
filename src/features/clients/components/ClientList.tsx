@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ClientForm } from "./ClientForm";
 import { deleteClient } from "../actions";
 import { sourceLabels } from "../schema";
-import type { Client } from "@/generated/prisma";
+import type { Client } from "@/lib/types";
 
 export function ClientList({ clients: initial }: { clients: Client[] }) {
   const [clients, setClients] = useState(initial);

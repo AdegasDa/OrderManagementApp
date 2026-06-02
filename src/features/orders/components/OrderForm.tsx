@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { X, Upload, Truck } from "lucide-react";
-import Image from "next/image";
 import { PhotoLightbox } from "./PhotoLightbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,10 +17,10 @@ import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils";
 import { orderSchema, type OrderFormValues } from "../schema";
 import { createOrder, updateOrder, deleteOrderPhoto } from "../actions";
-import type { Client, Product, PaymentType, OrderStatus, OrderPhoto } from "@/generated/prisma";
+import type { Client, Product, PaymentType, OrderStatus, OrderPhoto } from "@/lib/types";
 
 type FullOrder = {
-  id: string; orderNumber: number; orderDate: Date; clientId: string; productId: string;
+  id: string; orderNumber: number; orderDate: string; clientId: string; productId: string;
   paymentTypeId: string; statusId: string; totalValue: number; advanceAmount: number;
   deliveryFee: number; notes: string | null; deliveryNotes: string | null; photos: OrderPhoto[];
 };
@@ -94,12 +93,17 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
   }
 
   async function uploadFiles(): Promise<string[]> {
-    if (!newFiles.length) return [];
-    const fd = new FormData();
-    newFiles.forEach((f) => fd.append("files", f));
-    const res = await fetch("/api/uploads", { method: "POST", body: fd });
-    const data = await res.json();
-    return data.paths ?? [];
+    return Promise.all(
+      newFiles.map(
+        (f) =>
+          new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(f);
+          })
+      )
+    );
   }
 
   async function onSubmit(values: OrderFormValues) {
@@ -328,9 +332,9 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
                           onClick={() => setLightboxIndex(i)}
                           className="w-full h-full rounded-md overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         >
-                          <Image
-                            src={p.filePath} alt={`Foto ${i + 1}`} fill
-                            className="object-cover transition-transform group-hover:scale-105"
+                          <img
+                            src={p.filePath} alt={`Foto ${i + 1}`}
+                            className="w-full h-full object-cover transition-transform group-hover:scale-105"
                           />
                           <span className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-md" />
                         </button>
@@ -350,9 +354,9 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
                           onClick={() => setLightboxIndex(photos.length + i)}
                           className="w-full h-full rounded-md overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         >
-                          <Image
-                            src={src} alt={`Nova foto ${i + 1}`} fill
-                            className="object-cover transition-transform group-hover:scale-105"
+                          <img
+                            src={src} alt={`Nova foto ${i + 1}`}
+                            className="w-full h-full object-cover transition-transform group-hover:scale-105"
                           />
                           <span className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-md" />
                         </button>

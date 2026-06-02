@@ -9,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { clientSchema, type ClientFormValues, sourceLabels } from "../schema";
 import { createClient, updateClient } from "../actions";
-import type { Client } from "@/generated/prisma";
+import type { Client } from "@/lib/types";
 
 interface Props {
   client?: Client;

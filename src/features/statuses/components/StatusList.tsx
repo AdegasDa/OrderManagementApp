@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { statusSchema, type StatusFormValues } from "../schema";
 import { createOrderStatus, updateOrderStatus, deleteOrderStatus } from "../actions";
-import type { OrderStatus } from "@/generated/prisma";
+import type { OrderStatus } from "@/lib/types";
 
 export function StatusList({ statuses: initial }: { statuses: OrderStatus[] }) {
   const [items, setItems] = useState(initial);

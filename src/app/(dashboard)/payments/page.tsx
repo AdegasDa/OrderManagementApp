@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getPaymentTypes } from "@/features/payments/actions";
 import { PaymentTypeList } from "@/features/payments/components/PaymentTypeList";
 

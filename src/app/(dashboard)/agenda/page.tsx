@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getOrderCountsByMonth } from "@/features/orders/actions";
 import { AgendaView } from "@/features/agenda/components/AgendaView";
 

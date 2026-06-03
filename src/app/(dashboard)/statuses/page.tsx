@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getOrderStatuses } from "@/features/statuses/actions";
 import { StatusList } from "@/features/statuses/components/StatusList";
 

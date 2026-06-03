@@ -121,8 +121,8 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit as never)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <form onSubmit={form.handleSubmit(onSubmit as never)} className="space-y-4">
+        <div className="grid grid-cols-2 gap-3">
           {/* Date */}
           <FormField control={form.control} name="orderDate" render={({ field }) => (
             <FormItem>
@@ -258,7 +258,7 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
           </Card>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           {/* Total — auto-filled but editable */}
           <FormField control={form.control} name="totalValue" render={({ field }) => (
             <FormItem>
@@ -287,21 +287,23 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
           )} />
         </div>
 
-        <FormField control={form.control} name="notes" render={({ field }) => (
-          <FormItem>
-            <FormLabel>Notas</FormLabel>
-            <FormControl><Textarea placeholder="Notas da encomenda…" rows={3} {...field} /></FormControl>
-            <FormMessage />
-          </FormItem>
-        )} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <FormField control={form.control} name="notes" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Notas</FormLabel>
+              <FormControl><Textarea placeholder="Notas da encomenda…" rows={2} {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
 
-        <FormField control={form.control} name="deliveryNotes" render={({ field }) => (
-          <FormItem>
-            <FormLabel>Notas de Entrega</FormLabel>
-            <FormControl><Textarea placeholder="Instruções de entrega…" rows={3} {...field} /></FormControl>
-            <FormMessage />
-          </FormItem>
-        )} />
+          <FormField control={form.control} name="deliveryNotes" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Notas de Entrega</FormLabel>
+              <FormControl><Textarea placeholder="Instruções de entrega…" rows={2} {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
 
         {/* Photos */}
         <Card>

@@ -67,7 +67,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Searc
     <div className="px-4 py-4 md:p-6 space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">Encomendas</h1>
-        <Link href="/orders/new">
+        <Link href="/orders/new" className="hidden md:block">
           <Button size="sm"><Plus size={16} className="mr-2" />Nova Encomenda</Button>
         </Link>
       </div>
@@ -78,6 +78,14 @@ export default async function OrdersPage({ searchParams }: { searchParams: Searc
         {orders.length} encomenda{orders.length !== 1 ? "s" : ""}
       </p>
       <OrderList orders={orders} />
+
+      {/* FAB — mobile only */}
+      <Link
+        href="/orders/new"
+        className="md:hidden fixed right-5 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-40 flex items-center justify-center w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg active:scale-95 transition-transform"
+      >
+        <Plus size={26} />
+      </Link>
     </div>
   );
 }

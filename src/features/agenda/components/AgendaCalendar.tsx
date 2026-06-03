@@ -16,11 +16,11 @@ interface Props {
 function EventBlock({ info }: { info: EventContentArg }) {
   const count = info.event.extendedProps.count as number;
   return (
-    <div className="flex justify-center w-full py-0.5 px-1">
-      <div className="flex items-center gap-1.5 rounded-md bg-primary text-primary-foreground cursor-pointer select-none px-2.5 py-1.5">
-        <span className="text-sm font-bold leading-none">{count}</span>
-        <span className="text-[10px] font-medium leading-none opacity-85">
-          {count === 1 ? "Encomenda" : "Encomendas"}
+    <div className="flex justify-center w-full px-0.5">
+      <div className="flex items-center justify-center gap-1 rounded-md bg-primary text-primary-foreground cursor-pointer select-none w-full px-1 py-1 min-w-0 overflow-hidden">
+        <span className="text-xs font-bold leading-none shrink-0">{count}</span>
+        <span className="text-[9px] font-medium leading-none opacity-90 truncate hidden sm:block">
+          {count === 1 ? "enc." : "enc."}
         </span>
       </div>
     </div>
@@ -48,14 +48,22 @@ export function AgendaCalendar({ eventCounts, selectedDate, onDaySelect, onMonth
       <style>{`
         .agenda-calendar .fc-daygrid-event-harness {
           margin-top: 2px;
+          overflow: hidden;
+          max-width: 100%;
         }
         .agenda-calendar .fc-event {
           border: none !important;
           background: transparent !important;
-          padding: 0 2px;
+          padding: 0 1px;
+          overflow: hidden;
+          max-width: 100%;
         }
         .agenda-calendar .fc-event-main {
           padding: 0;
+          overflow: hidden;
+        }
+        .agenda-calendar .fc-daygrid-day-frame {
+          overflow: hidden;
         }
         .agenda-calendar .fc-daygrid-day {
           cursor: pointer;

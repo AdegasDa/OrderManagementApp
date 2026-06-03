@@ -5,7 +5,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { X, Upload, Truck } from "lucide-react";
+import { X, Upload, Truck, Loader2 } from "lucide-react";
 import { PhotoLightbox } from "./PhotoLightbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -351,8 +351,9 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
                       <div key={i} className="relative w-24 h-24 group">
                         <button
                           type="button"
-                          onClick={() => setLightboxIndex(photos.length + i)}
+                          onClick={() => !form.formState.isSubmitting && setLightboxIndex(photos.length + i)}
                           className="w-full h-full rounded-md overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          disabled={form.formState.isSubmitting}
                         >
                           <img
                             src={src} alt={`Nova foto ${i + 1}`}
@@ -360,13 +361,19 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
                           />
                           <span className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-md" />
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => removeNewFile(i)}
-                          className="absolute -top-2 -right-2 bg-destructive text-white rounded-full w-5 h-5 flex items-center justify-center z-10"
-                        >
-                          <X size={12} />
-                        </button>
+                        {form.formState.isSubmitting ? (
+                          <div className="absolute inset-0 bg-black/50 rounded-md flex items-center justify-center">
+                            <Loader2 size={20} className="text-white animate-spin" />
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => removeNewFile(i)}
+                            className="absolute -top-2 -right-2 bg-destructive text-white rounded-full w-5 h-5 flex items-center justify-center z-10"
+                          >
+                            <X size={12} />
+                          </button>
+                        )}
                       </div>
                     ))}
                   </div>

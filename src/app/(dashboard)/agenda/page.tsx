@@ -1,18 +1,11 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { getOrderCountsByMonth } from "@/features/orders/actions";
 import { AgendaView } from "@/features/agenda/components/AgendaView";
 
-export default function AgendaPage() {
+export default async function AgendaPage() {
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth() + 1;
-  const [counts, setCounts] = useState<Record<string, number>>({});
-
-  useEffect(() => {
-    getOrderCountsByMonth(year, month).then(setCounts);
-  }, [year, month]);
+  const counts = await getOrderCountsByMonth(year, month);
 
   return (
     <div className="p-6">

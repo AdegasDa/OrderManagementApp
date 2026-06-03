@@ -1,37 +1,50 @@
-import { getDb } from "@/lib/db";
+"use server";
+
+import { prisma } from "@/lib/prisma";
 import { productSchema } from "./schema";
 import type { Product } from "@/lib/types";
 
+function serialize(p: { id: string; name: string; description: string | null; salePrice: number; createdAt: Date; updatedAt: Date }): Product {
+  return { ...p, createdAt: p.createdAt.toISOString(), updatedAt: p.updatedAt.toISOString() };
+}
+
 export async function getProducts(): Promise<Product[]> {
-  const db = await getDb();
-  return db.select<Product[]>("SELECT * FROM products ORDER BY name ASC");
+  const rows = await prisma.product.findMany({ orderBy: { name: "asc" } });
+  return rows.map(serialize);
 }
 
 export async function createProduct(data: unknown) {
   const parsed = productSchema.safeParse(data);
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors };
-  const db = await getDb();
-  const now = new Date().toISOString();
-  await db.execute(
-    "INSERT INTO products (id, name, description, salePrice, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)",
-    [crypto.randomUUID(), parsed.data.name, parsed.data.description ?? null, parsed.data.salePrice, now, now]
-  );
-  return { success: true };
+  try {
+    await prisma.product.create({ data: { ...parsed.data, description: parsed.data.description || null } });
+    return { success: true };
+  } catch {
+    return { error: "Erro ao guardar produto." };
+  }
 }
 
 export async function updateProduct(id: string, data: unknown) {
   const parsed = productSchema.safeParse(data);
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors };
-  const db = await getDb();
-  await db.execute(
-    "UPDATE products SET name=?, description=?, salePrice=?, updatedAt=? WHERE id=?",
-    [parsed.data.name, parsed.data.description ?? null, parsed.data.salePrice, new Date().toISOString(), id]
-  );
-  return { success: true };
+  try {
+    await prisma.product.update({ where: { id }, data: { ...parsed.data, description: parsed.data.description || null } });
+    return { success: true };
+  } catch {
+    return { error: "Erro ao atualizar produto." };
+  }
 }
 
 export async function deleteProduct(id: string) {
-  const db = await getDb();
-  await db.execute("DELETE FROM products WHERE id = ?", [id]);
+  await prisma.product.delete({ where: { id } });
+  return { success: true };
+}
+
+export async function restoreProduct(product: Product) {
+  await prisma.product.upsert({
+    where: { id: product.id },
+    update: {},
+    create: { id: product.id, name: product.name, description: product.description, salePrice: product.salePrice },
+  });
   return { success: true };
 }

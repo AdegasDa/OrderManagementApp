@@ -8,6 +8,7 @@ import ptLocale from "@fullcalendar/core/locales/pt";
 
 interface Props {
   eventCounts: Record<string, number>;
+  selectedDate: string | null;
   onDaySelect: (date: string) => void;
   onMonthChange: (year: number, month: number) => void;
 }
@@ -26,7 +27,7 @@ function EventBlock({ info }: { info: EventContentArg }) {
   );
 }
 
-export function AgendaCalendar({ eventCounts, onDaySelect, onMonthChange }: Props) {
+export function AgendaCalendar({ eventCounts, selectedDate, onDaySelect, onMonthChange }: Props) {
   const events = Object.entries(eventCounts).map(([date, count]) => ({
     date,
     title: String(count),
@@ -96,6 +97,12 @@ export function AgendaCalendar({ eventCounts, onDaySelect, onMonthChange }: Prop
           align-items: center;
           justify-content: center;
         }
+        .agenda-calendar .fc-day-selected .fc-daygrid-day-frame {
+          background: hsl(var(--primary) / 0.12);
+          border-radius: 6px;
+          outline: 2px solid hsl(var(--primary) / 0.5);
+          outline-offset: -2px;
+        }
       `}</style>
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}
@@ -105,6 +112,7 @@ export function AgendaCalendar({ eventCounts, onDaySelect, onMonthChange }: Prop
         dateClick={(arg: DateClickArg) => onDaySelect(arg.dateStr)}
         eventClick={(arg: EventClickArg) => onDaySelect(arg.event.startStr)}
         eventContent={(info) => <EventBlock info={info} />}
+        dayCellClassNames={(arg) => arg.dateStr === selectedDate ? ["fc-day-selected"] : []}
         datesSet={handleDatesSet}
         headerToolbar={{ left: "prev,next today", center: "title", right: "" }}
         height="auto"

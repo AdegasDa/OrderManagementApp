@@ -1,37 +1,50 @@
-import { getDb } from "@/lib/db";
+"use server";
+
+import { prisma } from "@/lib/prisma";
 import { clientSchema } from "./schema";
 import type { Client } from "@/lib/types";
 
+function serialize(c: { id: string; name: string; phone: string; source: string; createdAt: Date; updatedAt: Date }): Client {
+  return { ...c, createdAt: c.createdAt.toISOString(), updatedAt: c.updatedAt.toISOString() };
+}
+
 export async function getClients(): Promise<Client[]> {
-  const db = await getDb();
-  return db.select<Client[]>("SELECT * FROM clients ORDER BY name ASC");
+  const rows = await prisma.client.findMany({ orderBy: { name: "asc" } });
+  return rows.map(serialize);
 }
 
 export async function createClient(data: unknown) {
   const parsed = clientSchema.safeParse(data);
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors };
-  const db = await getDb();
-  const now = new Date().toISOString();
-  await db.execute(
-    "INSERT INTO clients (id, name, phone, source, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)",
-    [crypto.randomUUID(), parsed.data.name, parsed.data.phone, parsed.data.source, now, now]
-  );
-  return { success: true };
+  try {
+    await prisma.client.create({ data: parsed.data });
+    return { success: true };
+  } catch {
+    return { error: "Erro ao guardar cliente." };
+  }
 }
 
 export async function updateClient(id: string, data: unknown) {
   const parsed = clientSchema.safeParse(data);
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors };
-  const db = await getDb();
-  await db.execute(
-    "UPDATE clients SET name=?, phone=?, source=?, updatedAt=? WHERE id=?",
-    [parsed.data.name, parsed.data.phone, parsed.data.source, new Date().toISOString(), id]
-  );
-  return { success: true };
+  try {
+    await prisma.client.update({ where: { id }, data: parsed.data });
+    return { success: true };
+  } catch {
+    return { error: "Erro ao atualizar cliente." };
+  }
 }
 
 export async function deleteClient(id: string) {
-  const db = await getDb();
-  await db.execute("DELETE FROM clients WHERE id = ?", [id]);
+  await prisma.client.delete({ where: { id } });
+  return { success: true };
+}
+
+export async function restoreClient(client: Client) {
+  await prisma.client.upsert({
+    where: { id: client.id },
+    update: {},
+    create: { id: client.id, name: client.name, phone: client.phone, source: client.source },
+  });
   return { success: true };
 }

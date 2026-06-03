@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { AgendaCalendar } from "./AgendaCalendar";
 import { DayOrders } from "./DayOrders";
 import { getOrderCountsByMonth } from "@/features/orders/actions";
@@ -14,6 +14,7 @@ interface Props {
 export function AgendaView({ initialCounts, initialYear, initialMonth }: Props) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [eventCounts, setEventCounts] = useState(initialCounts);
+  useEffect(() => setEventCounts(initialCounts), [initialCounts]);
   const [visibleYear, setVisibleYear] = useState(initialYear);
   const [visibleMonth, setVisibleMonth] = useState(initialMonth);
 
@@ -32,6 +33,7 @@ export function AgendaView({ initialCounts, initialYear, initialMonth }: Props) 
     <div className="space-y-6">
       <AgendaCalendar
         eventCounts={eventCounts}
+        selectedDate={selectedDate}
         onDaySelect={setSelectedDate}
         onMonthChange={handleMonthChange}
       />

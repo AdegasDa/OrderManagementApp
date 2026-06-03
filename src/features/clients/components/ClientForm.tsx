@@ -16,6 +16,15 @@ interface Props {
   onSuccess?: () => void;
 }
 
+function formatPhone(raw: string): string {
+  const hasPlus = raw.startsWith("+");
+  const digits = raw.replace(/\D/g, "");
+  const local = hasPlus && digits.startsWith("351") ? digits.slice(3) : digits;
+  const groups = local.match(/\d{1,3}/g) ?? [];
+  const formatted = groups.join(" ");
+  return hasPlus ? `+${digits.slice(0, 3)} ${formatted}`.trim() : formatted;
+}
+
 export function ClientForm({ client, onSuccess }: Props) {
   const form = useForm<ClientFormValues>({
     resolver: zodResolver(clientSchema) as never,
@@ -52,7 +61,15 @@ export function ClientForm({ client, onSuccess }: Props) {
         <FormField control={form.control} name="phone" render={({ field }) => (
           <FormItem>
             <FormLabel>Telefone</FormLabel>
-            <FormControl><Input placeholder="+351 900 000 000" {...field} /></FormControl>
+            <FormControl>
+              <Input
+                placeholder="+351 900 000 000"
+                inputMode="tel"
+                maxLength={17}
+                value={field.value}
+                onChange={(e) => field.onChange(formatPhone(e.target.value))}
+              />
+            </FormControl>
             <FormMessage />
           </FormItem>
         )} />

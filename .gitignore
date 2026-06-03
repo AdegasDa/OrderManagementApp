@@ -42,6 +42,10 @@ next-env.d.ts
 
 /src/generated/prisma
 
+# Tauri
+/src-tauri/target/
+/out/
+
 # SQLite dev databases
 *.db
 *.db-shm

@@ -5,8 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Plus, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getOrders } from "@/features/orders/actions";
-import { getOrderById } from "@/features/orders/actions";
+import { getOrders, getOrderById } from "@/features/orders/actions";
 import { getOrderStatuses } from "@/features/statuses/actions";
 import { getClients } from "@/features/clients/actions";
 import { getProducts } from "@/features/products/actions";
@@ -78,6 +77,12 @@ function OrderListContent() {
 
   return (
     <>
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-xl font-semibold">Encomendas</h1>
+        <Link href="/orders/new">
+          <Button size="sm"><Plus size={16} className="mr-2" />Nova Encomenda</Button>
+        </Link>
+      </div>
       <OrderFilters statuses={statuses} />
       <div className="mt-4">
         <p className="text-xs text-muted-foreground mb-2">
@@ -96,19 +101,8 @@ function OrdersContent() {
 }
 
 export default function OrdersPage() {
-  const searchParams = useSearchParams();
-  const id = searchParams.get("id");
-
   return (
     <div className="p-6 space-y-4">
-      {!id && (
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold">Encomendas</h1>
-          <Link href="/orders/new">
-            <Button size="sm"><Plus size={16} className="mr-2" />Nova Encomenda</Button>
-          </Link>
-        </div>
-      )}
       <Suspense fallback={<p className="text-muted-foreground">A carregar…</p>}>
         <OrdersContent />
       </Suspense>

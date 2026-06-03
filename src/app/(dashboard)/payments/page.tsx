@@ -1,17 +1,10 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { getPaymentTypes } from "@/features/payments/actions";
 import { PaymentTypeList } from "@/features/payments/components/PaymentTypeList";
-import type { PaymentType } from "@/lib/types";
 
-export default function PaymentsPage() {
-  const [paymentTypes, setPaymentTypes] = useState<PaymentType[]>([]);
-
-  useEffect(() => { getPaymentTypes().then(setPaymentTypes); }, []);
-
+export default async function PaymentsPage() {
+  const paymentTypes = await getPaymentTypes();
   return (
-    <div className="p-6">
+    <div className="px-4 py-4 md:p-6">
       <PaymentTypeList paymentTypes={paymentTypes} />
     </div>
   );

@@ -1,27 +1,65 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatCurrency } from "@/lib/utils";
 import { ProductForm } from "./ProductForm";
-import { deleteProduct } from "../actions";
+import { deleteProduct, restoreProduct } from "../actions";
 import type { Product } from "@/lib/types";
 
 export function ProductList({ products: initial }: { products: Product[] }) {
+  const router = useRouter();
   const [products, setProducts] = useState(initial);
+  useEffect(() => setProducts(initial), [initial]);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [openCreate, setOpenCreate] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
 
   async function handleDelete(id: string) {
-    if (!confirm("Eliminar produto?")) return;
-    await deleteProduct(id);
+    const product = products.find((p) => p.id === id)!;
     setProducts((prev) => prev.filter((p) => p.id !== id));
-    toast.success("Produto eliminado.");
+    await deleteProduct(id);
+    toast.success("Produto eliminado.", {
+      action: {
+        label: "Desfazer",
+        onClick: async () => {
+          await restoreProduct(product);
+          setProducts((prev) => [...prev, product].sort((a, b) => a.name.localeCompare(b.name)));
+        },
+      },
+    });
   }
+
+  const dialogs = (
+    <>
+      <Dialog open={openCreate} onOpenChange={setOpenCreate}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Novo Produto</DialogTitle></DialogHeader>
+          <ProductForm onSuccess={() => { setOpenCreate(false); router.refresh(); }} />
+        </DialogContent>
+      </Dialog>
+      <Dialog open={!!editProduct} onOpenChange={(o) => !o && setEditProduct(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Editar Produto</DialogTitle></DialogHeader>
+          {editProduct && (
+            <ProductForm product={editProduct} onSuccess={() => { setEditProduct(null); router.refresh(); }} />
+          )}
+        </DialogContent>
+      </Dialog>
+      <DeleteDialog
+        open={!!pendingDelete}
+        onOpenChange={(o) => !o && setPendingDelete(null)}
+        onConfirm={() => { if (pendingDelete) handleDelete(pendingDelete); setPendingDelete(null); }}
+        description="Tem a certeza que quer eliminar este produto? Esta ação não pode ser desfeita."
+      />
+    </>
+  );
 
   return (
     <div className="space-y-4">
@@ -32,23 +70,38 @@ export function ProductList({ products: initial }: { products: Product[] }) {
         </Button>
       </div>
 
-      <Dialog open={openCreate} onOpenChange={setOpenCreate}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Novo Produto</DialogTitle></DialogHeader>
-          <ProductForm onSuccess={() => { setOpenCreate(false); window.location.reload(); }} />
-        </DialogContent>
-      </Dialog>
+      {dialogs}
 
-      <Dialog open={!!editProduct} onOpenChange={(o) => !o && setEditProduct(null)}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Editar Produto</DialogTitle></DialogHeader>
-          {editProduct && (
-            <ProductForm product={editProduct} onSuccess={() => { setEditProduct(null); window.location.reload(); }} />
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* ── Mobile card list ─────────────────────────────────────────── */}
+      <div className="md:hidden space-y-2">
+        {products.length === 0 && (
+          <p className="text-center text-muted-foreground py-10 text-sm">Nenhum produto registado.</p>
+        )}
+        {products.map((p) => (
+          <div key={p.id} className="bg-card border rounded-2xl p-4 flex items-center gap-3">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-2">
+                <p className="font-semibold text-sm truncate">{p.name}</p>
+                <span className="font-semibold text-sm text-primary shrink-0">{formatCurrency(p.salePrice)}</span>
+              </div>
+              {p.description && (
+                <p className="text-xs text-muted-foreground mt-0.5 truncate">{p.description}</p>
+              )}
+            </div>
+            <div className="flex gap-1 shrink-0">
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setEditProduct(p)}>
+                <Pencil size={15} />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setPendingDelete(p.id)}>
+                <Trash2 size={15} className="text-destructive" />
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
 
-      <div className="border rounded-lg overflow-x-auto">
+      {/* ── Desktop table ─────────────────────────────────────────────── */}
+      <div className="hidden md:block border rounded-lg overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -67,7 +120,7 @@ export function ProductList({ products: initial }: { products: Product[] }) {
             {products.map((p) => (
               <TableRow key={p.id}>
                 <TableCell className="font-medium">{p.name}</TableCell>
-                <TableCell className="text-muted-foreground text-sm max-w-xs truncate">
+                <TableCell title={p.description ?? undefined} className="text-muted-foreground text-sm max-w-xs truncate">
                   {p.description ?? "—"}
                 </TableCell>
                 <TableCell>{formatCurrency(p.salePrice)}</TableCell>
@@ -76,7 +129,7 @@ export function ProductList({ products: initial }: { products: Product[] }) {
                     <Button variant="ghost" size="icon" onClick={() => setEditProduct(p)}>
                       <Pencil size={16} />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(p.id)}>
+                    <Button variant="ghost" size="icon" onClick={() => setPendingDelete(p.id)}>
                       <Trash2 size={16} className="text-destructive" />
                     </Button>
                   </div>

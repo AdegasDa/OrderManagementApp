@@ -1,17 +1,10 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { getClients } from "@/features/clients/actions";
 import { ClientList } from "@/features/clients/components/ClientList";
-import type { Client } from "@/lib/types";
 
-export default function ClientsPage() {
-  const [clients, setClients] = useState<Client[]>([]);
-
-  useEffect(() => { getClients().then(setClients); }, []);
-
+export default async function ClientsPage() {
+  const clients = await getClients();
   return (
-    <div className="p-6">
+    <div className="px-4 py-4 md:p-6">
       <ClientList clients={clients} />
     </div>
   );

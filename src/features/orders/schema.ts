@@ -2,7 +2,8 @@ import { z } from "zod";
 
 export const orderProductSchema = z.object({
   productId: z.string().min(1, "Produto é obrigatório"),
-  quantity: z.number().int().min(1).default(1),
+  quantity:  z.number().int().min(1).default(1),
+  unitPrice: z.number().min(0).default(0),
 });
 
 export const orderSchema = z.object({

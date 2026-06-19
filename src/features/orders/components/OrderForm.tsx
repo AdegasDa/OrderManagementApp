@@ -47,7 +47,7 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
     defaultValues: {
       orderDate:     order ? new Date(order.orderDate).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
       clientId:      order?.clientId ?? "",
-      products:      order?.orderProducts.map((op) => ({ productId: op.productId, quantity: op.quantity })) ?? [{ productId: "", quantity: 1 }],
+      products:      order?.orderProducts.map((op) => ({ productId: op.productId, quantity: op.quantity, unitPrice: op.product?.salePrice ?? 0 })) ?? [{ productId: "", quantity: 1, unitPrice: 0 }],
       paymentTypeId: order?.paymentTypeId ?? "",
       statusId:      order?.statusId ?? "",
       totalValue:    order?.totalValue ?? 0,
@@ -66,9 +66,9 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
 
   useEffect(() => {
     const productsTotal = watchedProducts.reduce((sum, line) => {
-      const p = products.find((p) => p.id === line.productId);
-      const qty = isNaN(line.quantity) ? 0 : line.quantity;
-      return sum + (p ? p.salePrice * qty : 0);
+      const qty   = isNaN(line.quantity)  ? 0 : line.quantity;
+      const price = isNaN(line.unitPrice) ? 0 : line.unitPrice;
+      return sum + price * qty;
     }, 0);
     const fee = isNaN(watchedDeliveryFee) ? 0 : watchedDeliveryFee;
     form.setValue("totalValue", +(productsTotal + fee).toFixed(2), { shouldDirty: true });
@@ -141,7 +141,7 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-[5fr_8fr] gap-4 items-start">
+            <div className="grid grid-cols-[8fr_5fr] gap-4 items-center">
               <FormField control={form.control} name="orderDate" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Data da Encomenda</FormLabel>
@@ -212,65 +212,82 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
           </CardHeader>
           <CardContent className="space-y-3">
             {fields.map((field, index) => {
-              const selectedProduct = products.find((p) => p.id === watchedProducts[index]?.productId);
-              const qty = isNaN(watchedProducts[index]?.quantity) ? 0 : (watchedProducts[index]?.quantity ?? 0);
-              const lineTotal = selectedProduct ? selectedProduct.salePrice * qty : 0;
+              const qty       = isNaN(watchedProducts[index]?.quantity)  ? 0 : (watchedProducts[index]?.quantity  ?? 0);
+              const unitPrice = isNaN(watchedProducts[index]?.unitPrice) ? 0 : (watchedProducts[index]?.unitPrice ?? 0);
+              const lineTotal = unitPrice * qty;
 
               return (
-                <div key={field.id} className="flex gap-2 items-start">
-                  {/* Product select */}
-                  <FormField control={form.control} name={`products.${index}.productId`} render={({ field: f }) => (
-                    <FormItem className="w-[55%] shrink min-w-0">
-                      {index === 0 && <FormLabel>Produto</FormLabel>}
-                      <Select value={f.value || null} onValueChange={(v) => f.onChange(v ?? f.value)}
-                        items={products.map((p) => ({ value: p.id, label: p.name }))}>
-                        <FormControl>
-                          <SelectTrigger className="w-full"><SelectValue placeholder="Selecionar produto" /></SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="min-w-64" alignItemWithTrigger={false}>
-                          {products.map((p) => (
-                            <SelectItem key={p.id} value={p.id}>
-                              <span className="flex flex-col gap-0.5">
-                                <span>{p.name}</span>
-                                <span className="text-muted-foreground text-xs">{formatCurrency(p.salePrice)}</span>
-                              </span>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
+                <div key={field.id} className="rounded-xl border bg-card shadow-sm overflow-hidden flex">
+                  {/* Left: product + qty/price */}
+                  <div className="flex-1 min-w-0 space-y-2 p-3">
+                    <FormField control={form.control} name={`products.${index}.productId`} render={({ field: f }) => (
+                      <FormItem className="min-w-0">
+                        {index === 0 && <FormLabel>Produto</FormLabel>}
+                        <Select value={f.value || null} onValueChange={(v) => {
+                          f.onChange(v ?? f.value);
+                          const p = products.find((p) => p.id === v);
+                          if (p) form.setValue(`products.${index}.unitPrice`, p.salePrice, { shouldDirty: true });
+                        }}
+                          items={products.map((p) => ({ value: p.id, label: p.name }))}>
+                          <FormControl>
+                            <SelectTrigger className="w-full"><SelectValue placeholder="Selecionar produto" /></SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="min-w-64" alignItemWithTrigger={false}>
+                            {products.map((p) => (
+                              <SelectItem key={p.id} value={p.id}>
+                                <span className="flex flex-col gap-0.5">
+                                  <span>{p.name}</span>
+                                  <span className="text-muted-foreground text-xs">{formatCurrency(p.salePrice)}</span>
+                                </span>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
 
-                  {/* Quantity */}
-                  <FormField control={form.control} name={`products.${index}.quantity`} render={({ field: f }) => (
-                    <FormItem className="w-20 shrink-0">
-                      {index === 0 && <FormLabel>Qtd.</FormLabel>}
-                      <FormControl>
-                        <Input type="number" min="1" step="1"
-                          value={isNaN(f.value) ? "" : f.value}
-                          onChange={(e) => f.onChange(isNaN(e.target.valueAsNumber) ? 1 : e.target.valueAsNumber)} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-
-                  {/* Line total + remove */}
-                  <div className={`flex items-center gap-1 shrink-0 ${index === 0 ? "mt-6" : ""}`}>
-                    <span className="text-sm font-medium text-muted-foreground w-16 text-right">
-                      {lineTotal > 0 ? formatCurrency(lineTotal) : ""}
-                    </span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                      disabled={fields.length === 1}
-                      onClick={() => remove(index)}
-                    >
-                      <Trash2 size={14} />
-                    </Button>
+                    <div className="flex gap-3 items-end">
+                      <FormField control={form.control} name={`products.${index}.quantity`} render={({ field: f }) => (
+                        <FormItem className="w-20">
+                          <FormLabel className="text-xs text-muted-foreground">Qtd.</FormLabel>
+                          <FormControl>
+                            <Input type="number" min="1" step="1"
+                              value={isNaN(f.value) ? "" : f.value}
+                              onChange={(e) => f.onChange(isNaN(e.target.valueAsNumber) ? 1 : e.target.valueAsNumber)} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={form.control} name={`products.${index}.unitPrice`} render={({ field: f }) => (
+                        <FormItem className="w-24">
+                          <FormLabel className="text-xs text-muted-foreground">Preço (€)</FormLabel>
+                          <FormControl>
+                            <Input type="number" min="0" step="0.01"
+                              placeholder="0.00"
+                              value={!f.value || isNaN(f.value) ? "" : f.value}
+                              onChange={(e) => f.onChange(isNaN(e.target.valueAsNumber) ? 0 : e.target.valueAsNumber)} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      {lineTotal > 0 && (
+                        <span className="text-sm font-semibold text-foreground pb-2 ml-auto">
+                          {formatCurrency(lineTotal)}
+                        </span>
+                      )}
+                    </div>
                   </div>
+
+                  {/* Right: full-height red trash strip */}
+                  <button
+                    type="button"
+                    className="w-8 shrink-0 bg-red-500 text-white hover:bg-red-400 flex items-center justify-center transition-colors disabled:opacity-40 [box-shadow:0_0_8px_2px_rgba(239,68,68,0.7)]"
+                    disabled={fields.length === 1}
+                    onClick={() => remove(index)}
+                  >
+                    <Trash2 size={15} />
+                  </button>
                 </div>
               );
             })}

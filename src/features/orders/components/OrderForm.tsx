@@ -297,7 +297,7 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
               variant="outline"
               size="sm"
               className="w-full mt-1"
-              onClick={() => append({ productId: "", quantity: 1 })}
+              onClick={() => append({ productId: "", quantity: 1, unitPrice: 0 })}
             >
               <Plus size={14} /> Adicionar produto
             </Button>

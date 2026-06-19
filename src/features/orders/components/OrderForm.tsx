@@ -141,7 +141,7 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-[8fr_5fr] gap-4 items-center">
+            <div className="grid grid-cols-[6fr_7fr] gap-4 items-center">
               <FormField control={form.control} name="orderDate" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Data da Encomenda</FormLabel>

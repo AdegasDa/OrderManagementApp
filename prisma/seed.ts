@@ -150,13 +150,15 @@ async function main() {
         orderNumber:   nextNumber,
         orderDate:     o.date,
         clientId:      clients[o.clientIdx].id,
-        productId:     products[o.productIdx].id,
         paymentTypeId: ptByName[o.ptName],
         statusId:      stByName[o.stName],
         totalValue:    o.total,
         advanceAmount: o.advance,
         notes:         o.notes   || null,
         deliveryNotes: o.deliveryNotes || null,
+        orderProducts: {
+          create: [{ productId: products[o.productIdx].id, quantity: 1 }],
+        },
       },
     });
   }

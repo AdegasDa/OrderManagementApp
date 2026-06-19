@@ -16,8 +16,8 @@ interface Props {
 
 export function OrderDetailView({ order, clients, products, paymentTypes, statuses }: Props) {
   const router = useRouter();
-  const clientName  = clients.find((c) => c.id === order.clientId)?.name;
-  const productName = products.find((p) => p.id === order.productId)?.name;
+  const clientName   = clients.find((c) => c.id === order.clientId)?.name;
+  const productNames = order.orderProducts.map((op) => op.product.name).join(", ");
 
   return (
     <div className="max-w-3xl">
@@ -31,9 +31,9 @@ export function OrderDetailView({ order, clients, products, paymentTypes, status
             <h1 className="text-xl font-semibold leading-tight">Encomenda #{order.orderNumber}</h1>
           </div>
         </div>
-        {(clientName || productName) && (
+        {(clientName || productNames) && (
           <p className="text-sm text-muted-foreground ml-11 mt-0.5">
-            {[clientName, productName].filter(Boolean).join(" · ")}
+            {[clientName, productNames].filter(Boolean).join(" · ")}
           </p>
         )}
       </div>

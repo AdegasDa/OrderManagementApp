@@ -20,13 +20,13 @@ model Client {
 }
 
 model Product {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  salePrice   Float
-  orders      Order[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String         @id @default(cuid())
+  name          String
+  description   String?
+  salePrice     Float
+  orderProducts OrderProduct[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 
   @@map("products")
 }
@@ -53,27 +53,38 @@ model OrderStatus {
 }
 
 model Order {
-  id            String      @id @default(cuid())
-  orderNumber   Int         @unique
+  id            String         @id @default(cuid())
+  orderNumber   Int            @unique
   orderDate     DateTime
-  client        Client      @relation(fields: [clientId], references: [id])
+  client        Client         @relation(fields: [clientId], references: [id])
   clientId      String
-  product       Product     @relation(fields: [productId], references: [id])
-  productId     String
-  paymentType   PaymentType @relation(fields: [paymentTypeId], references: [id])
+  paymentType   PaymentType    @relation(fields: [paymentTypeId], references: [id])
   paymentTypeId String
-  status        OrderStatus @relation(fields: [statusId], references: [id])
+  status        OrderStatus    @relation(fields: [statusId], references: [id])
   statusId      String
   totalValue    Float
-  advanceAmount Float       @default(0)
-  deliveryFee   Float       @default(0)
+  advanceAmount Float          @default(0)
+  deliveryFee   Float          @default(0)
+  pickupHour    String?
   notes         String?
   deliveryNotes String?
   photos        OrderPhoto[]
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  orderProducts OrderProduct[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 
   @@map("orders")
+}
+
+model OrderProduct {
+  id        String  @id @default(cuid())
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId   String
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+  quantity  Int     @default(1)
+
+  @@map("order_products")
 }
 
 model OrderPhoto {

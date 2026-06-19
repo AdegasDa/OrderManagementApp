@@ -25,21 +25,23 @@ export function MobileNav() {
 
   return (
     <>
+      {/* Backdrop for "more" drawer */}
       {moreOpen && (
         <div
-          className="md:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+          className="md:hidden fixed inset-0 z-40"
           onClick={() => setMoreOpen(false)}
         />
       )}
 
+      {/* More menu popup */}
       <div
         className={cn(
-          "md:hidden fixed left-4 right-4 z-50 bg-card border rounded-2xl shadow-2xl overflow-hidden transition-all duration-200 ease-out",
+          "md:hidden fixed left-4 right-4 z-50 bg-card/95 backdrop-blur-xl border border-border/50 rounded-full shadow-2xl overflow-hidden transition-all duration-200 ease-out",
           moreOpen
             ? "opacity-100 translate-y-0"
-            : "opacity-0 translate-y-2 pointer-events-none"
+            : "opacity-0 translate-y-3 pointer-events-none"
         )}
-        style={{ bottom: "calc(4.5rem + env(safe-area-inset-bottom))" }}
+        style={{ bottom: "calc(7rem + env(safe-area-inset-bottom))" }}
       >
         <div className="p-2">
           {moreItems.map(({ href, label, icon: Icon }) => (
@@ -61,30 +63,25 @@ export function MobileNav() {
         </div>
       </div>
 
+      {/* Floating island nav */}
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-md border-t"
-        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+        className="md:hidden fixed left-4 right-4 z-50 bg-card/90 backdrop-blur-xl border border-border/40 rounded-full shadow-2xl"
+        style={{ bottom: "calc(1.75rem + env(safe-area-inset-bottom))" }}
       >
-        <div className="flex h-[4rem]">
+        <div className="flex h-16 px-1">
           {mainItems.map(({ href, label, icon: Icon }) => {
             const active = pathname.startsWith(href);
             return (
               <Link
                 key={href}
                 href={href}
-                className="flex-1 flex flex-col items-center justify-center"
+                className="flex-1 flex flex-col items-center justify-center gap-1"
               >
                 <div className={cn(
-                  "flex flex-col items-center gap-1 px-2 py-1.5 rounded-xl transition-all",
-                  active && "bg-primary/10"
+                  "flex items-center justify-center p-3.5 rounded-full transition-all duration-150",
+                  active ? "bg-primary text-primary-foreground" : "text-muted-foreground"
                 )}>
-                  <Icon size={21} className={active ? "text-primary" : "text-muted-foreground"} strokeWidth={active ? 2.2 : 1.8} />
-                  <span className={cn(
-                    "text-[10px] font-medium leading-none",
-                    active ? "text-primary" : "text-muted-foreground"
-                  )}>
-                    {label}
-                  </span>
+                  <Icon size={20} strokeWidth={active ? 2.2 : 1.8} />
                 </div>
               </Link>
             );
@@ -92,22 +89,16 @@ export function MobileNav() {
 
           <button
             onClick={() => setMoreOpen((o) => !o)}
-            className="flex-1 flex flex-col items-center justify-center"
+            className="flex-1 flex flex-col items-center justify-center gap-1"
           >
             <div className={cn(
-              "flex flex-col items-center gap-1 px-2 py-1.5 rounded-xl transition-all",
-              (isMoreActive || moreOpen) && "bg-primary/10"
+              "flex items-center justify-center p-3.5 rounded-full transition-all duration-150",
+              (isMoreActive || moreOpen) ? "bg-primary text-primary-foreground" : "text-muted-foreground"
             )}>
               {moreOpen
-                ? <X size={21} className={isMoreActive || moreOpen ? "text-primary" : "text-muted-foreground"} strokeWidth={2.2} />
-                : <MoreHorizontal size={21} className={isMoreActive || moreOpen ? "text-primary" : "text-muted-foreground"} strokeWidth={1.8} />
+                ? <X size={20} strokeWidth={2.2} />
+                : <MoreHorizontal size={20} strokeWidth={1.8} />
               }
-              <span className={cn(
-                "text-[10px] font-medium leading-none",
-                (isMoreActive || moreOpen) ? "text-primary" : "text-muted-foreground"
-              )}>
-                Mais
-              </span>
             </div>
           </button>
         </div>

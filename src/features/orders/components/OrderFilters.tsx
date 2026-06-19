@@ -16,12 +16,8 @@ import { cn } from "@/lib/utils";
 import type { OrderStatus } from "@/lib/types";
 
 const SORT_OPTIONS = [
-  { value: "date-desc",   label: "Data — mais recente" },
-  { value: "date-asc",    label: "Data — mais antiga" },
-  { value: "number-desc", label: "Nº — decrescente" },
-  { value: "number-asc",  label: "Nº — crescente" },
-  { value: "total-desc",  label: "Total — maior primeiro" },
-  { value: "total-asc",   label: "Total — menor primeiro" },
+  { value: "time-asc",  label: "Hora — crescente" },
+  { value: "status",    label: "Estado" },
 ];
 
 export function OrderFilters({ statuses }: { statuses: OrderStatus[] }) {
@@ -35,7 +31,7 @@ export function OrderFilters({ statuses }: { statuses: OrderStatus[] }) {
   const [statusId,    setStatusId]    = useState(searchParams.get("statusId")    ?? "");
   const [dateFrom,    setDateFrom]    = useState(searchParams.get("dateFrom")    ?? "");
   const [dateTo,      setDateTo]      = useState(searchParams.get("dateTo")      ?? "");
-  const [sortBy,      setSortBy]      = useState(searchParams.get("sortBy")      ?? "date-desc");
+  const [sortBy,      setSortBy]      = useState(searchParams.get("sortBy")      ?? "time-asc");
 
   const activeCount = [orderNumber, clientName, statusId, dateFrom, dateTo].filter(Boolean).length;
 
@@ -47,14 +43,14 @@ export function OrderFilters({ statuses }: { statuses: OrderStatus[] }) {
     if (statusId)    params.set("statusId",    statusId);
     if (dateFrom)    params.set("dateFrom",    dateFrom);
     if (dateTo)      params.set("dateTo",      dateTo);
-    if (sort && sort !== "date-desc") params.set("sortBy", sort);
+    if (sort && sort !== "time-asc") params.set("sortBy", sort);
     router.push(`${pathname}?${params.toString()}`);
     setOpen(false);
   }
 
   function clearFilters() {
     setOrderNumber(""); setClientName(""); setStatusId("");
-    setDateFrom(""); setDateTo(""); setSortBy("date-desc");
+    setDateFrom(""); setDateTo(""); setSortBy("time-asc");
     router.push(pathname);
     setOpen(false);
   }
@@ -120,11 +116,10 @@ export function OrderFilters({ statuses }: { statuses: OrderStatus[] }) {
         <div className="flex gap-2">
           <Button
             variant="outline"
-            size="sm"
             onClick={() => setOpen((o) => !o)}
-            className={cn("flex-1 justify-start gap-2", activeCount > 0 && "border-primary text-primary")}
+            className={cn("flex-1 justify-start gap-2 h-10 text-sm", activeCount > 0 && "border-primary text-primary")}
           >
-            <SlidersHorizontal size={15} />
+            <SlidersHorizontal size={16} />
             Filtros
             {activeCount > 0 && (
               <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
@@ -136,7 +131,7 @@ export function OrderFilters({ statuses }: { statuses: OrderStatus[] }) {
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
-                <Button variant="outline" size="sm">
+                <Button variant="outline" className="h-10 text-sm px-4">
                   Ordem <ChevronDown size={14} className="ml-1 opacity-60" />
                 </Button>
               }

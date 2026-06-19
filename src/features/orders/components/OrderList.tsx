@@ -65,7 +65,9 @@ export function OrderList({ orders: initial }: { orders: OrderWithRelations[] })
                   </Badge>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="font-semibold text-sm">{formatCurrency(o.totalValue)}</span>
+                  <span className={`font-semibold text-sm ${paid ? "" : "text-destructive"}`}>
+                    {paid ? "Pago" : formatCurrency(remaining)}
+                  </span>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -81,7 +83,7 @@ export function OrderList({ orders: initial }: { orders: OrderWithRelations[] })
 
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground min-w-0">
-                  <span className="truncate">{o.product.name}</span>
+                  <span className="truncate">{o.orderProducts.map((op) => op.product.name).join(", ")}</span>
                   <span>·</span>
                   <span className="shrink-0">{formatDate(o.orderDate)}</span>
                   {o.deliveryFee > 0 && (
@@ -93,10 +95,7 @@ export function OrderList({ orders: initial }: { orders: OrderWithRelations[] })
                     </>
                   )}
                 </div>
-                {paid
-                  ? <Badge variant="secondary" className="text-xs shrink-0">Pago</Badge>
-                  : <span className="text-xs font-semibold text-destructive shrink-0">{formatCurrency(remaining)}</span>
-                }
+                <span className="text-xs text-muted-foreground shrink-0">{formatCurrency(o.totalValue)}</span>
               </div>
             </div>
           );
@@ -139,7 +138,7 @@ export function OrderList({ orders: initial }: { orders: OrderWithRelations[] })
                   <TableCell className="font-mono font-semibold">#{o.orderNumber}</TableCell>
                   <TableCell className="whitespace-nowrap">{formatDate(o.orderDate)}</TableCell>
                   <TableCell>{o.client.name}</TableCell>
-                  <TableCell>{o.product.name}</TableCell>
+                  <TableCell>{o.orderProducts.map((op) => op.product.name).join(", ")}</TableCell>
                   <TableCell>
                     {hasDelivery
                       ? <span className="flex items-center gap-1.5 text-sm"><Truck size={14} className="shrink-0" />{formatCurrency(o.deliveryFee)}</span>

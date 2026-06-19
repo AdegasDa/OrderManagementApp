@@ -38,17 +38,25 @@ export type OrderPhoto = {
   createdAt: string;
 };
 
+export type OrderProduct = {
+  id: string;
+  orderId: string;
+  productId: string;
+  quantity: number;
+  product: Product;
+};
+
 export type Order = {
   id: string;
   orderNumber: number;
   orderDate: string;
   clientId: string;
-  productId: string;
   paymentTypeId: string;
   statusId: string;
   totalValue: number;
   advanceAmount: number;
   deliveryFee: number;
+  pickupHour: string | null;
   notes: string | null;
   deliveryNotes: string | null;
   createdAt: string;
@@ -57,7 +65,7 @@ export type Order = {
 
 export type OrderWithRelations = Order & {
   client: Client;
-  product: Product;
+  orderProducts: OrderProduct[];
   paymentType: PaymentType;
   status: OrderStatus;
   photos: OrderPhoto[];

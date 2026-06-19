@@ -12,8 +12,11 @@ export default async function NewOrderPage() {
   ]);
 
   return (
-    <div className="px-4 py-4 md:p-6 max-w-3xl">
-      <h1 className="text-xl font-semibold mb-6">Nova Encomenda</h1>
+    <div className="px-4 py-6 md:p-8 max-w-2xl mx-auto">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold tracking-tight">Nova Encomenda</h1>
+        <p className="text-sm text-muted-foreground mt-1">Preencha os dados para criar uma nova encomenda.</p>
+      </div>
       <OrderForm
         clients={clients}
         products={products}

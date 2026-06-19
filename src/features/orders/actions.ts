@@ -2,37 +2,43 @@
 
 import { prisma, toDate, fromDate } from "@/lib/prisma";
 import { orderSchema } from "./schema";
-import type { OrderWithRelations, OrderPhoto } from "@/lib/types";
+import type { OrderWithRelations, OrderPhoto, OrderProduct } from "@/lib/types";
 
 const include = {
-  client: true,
-  product: true,
-  paymentType: true,
-  status: true,
-  photos: { orderBy: { createdAt: "asc" as const } },
+  client:        true,
+  orderProducts: { include: { product: true } },
+  paymentType:   true,
+  status:        true,
+  photos:        { orderBy: { createdAt: "asc" as const } },
 } as const;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapOrder(o: any): OrderWithRelations {
   return {
-    id: o.id,
-    orderNumber: o.orderNumber,
-    orderDate: fromDate(o.orderDate),
-    clientId: o.clientId,
-    productId: o.productId,
+    id:            o.id,
+    orderNumber:   o.orderNumber,
+    orderDate:     fromDate(o.orderDate),
+    clientId:      o.clientId,
     paymentTypeId: o.paymentTypeId,
-    statusId: o.statusId,
-    totalValue: o.totalValue,
+    statusId:      o.statusId,
+    totalValue:    o.totalValue,
     advanceAmount: o.advanceAmount,
-    deliveryFee: o.deliveryFee,
-    notes: o.notes,
+    deliveryFee:   o.deliveryFee,
+    pickupHour:    o.pickupHour ?? null,
+    notes:         o.notes,
     deliveryNotes: o.deliveryNotes,
-    createdAt: o.createdAt.toISOString(),
-    updatedAt: o.updatedAt.toISOString(),
-    client: { ...o.client, createdAt: o.client.createdAt.toISOString(), updatedAt: o.client.updatedAt.toISOString() },
-    product: { ...o.product, createdAt: o.product.createdAt.toISOString(), updatedAt: o.product.updatedAt.toISOString() },
+    createdAt:     o.createdAt.toISOString(),
+    updatedAt:     o.updatedAt.toISOString(),
+    client:      { ...o.client,      createdAt: o.client.createdAt.toISOString(),      updatedAt: o.client.updatedAt.toISOString() },
     paymentType: { ...o.paymentType, createdAt: o.paymentType.createdAt.toISOString(), updatedAt: o.paymentType.updatedAt.toISOString() },
-    status: { ...o.status, createdAt: o.status.createdAt.toISOString(), updatedAt: o.status.updatedAt.toISOString() },
+    status:      { ...o.status,      createdAt: o.status.createdAt.toISOString(),      updatedAt: o.status.updatedAt.toISOString() },
+    orderProducts: (o.orderProducts as Array<OrderProduct & { product: { createdAt: Date; updatedAt: Date } }>).map((op) => ({
+      id:        op.id,
+      orderId:   op.orderId,
+      productId: op.productId,
+      quantity:  op.quantity,
+      product:   { ...op.product, createdAt: op.product.createdAt.toISOString(), updatedAt: op.product.updatedAt.toISOString() },
+    })),
     photos: (o.photos as Array<OrderPhoto & { createdAt: Date | string }>).map((p) => ({
       ...p,
       createdAt: typeof p.createdAt === "object" ? (p.createdAt as Date).toISOString() : p.createdAt,
@@ -41,12 +47,8 @@ function mapOrder(o: any): OrderWithRelations {
 }
 
 const SORT_MAP: Record<string, object> = {
-  "date-desc":   { orderDate: "desc" },
-  "date-asc":    { orderDate: "asc" },
-  "number-desc": { orderNumber: "desc" },
-  "number-asc":  { orderNumber: "asc" },
-  "total-desc":  { totalValue: "desc" },
-  "total-asc":   { totalValue: "asc" },
+  "time-asc": { pickupHour: "asc" },
+  "status":   { status: { name: "asc" } },
 };
 
 export async function getOrders(filters?: {
@@ -63,7 +65,7 @@ export async function getOrders(filters?: {
     if (filters?.dateTo)   where.orderDate.lte = new Date(filters.dateTo + "T23:59:59.999Z");
   }
 
-  const orderBy = SORT_MAP[filters?.sortBy ?? "date-desc"] ?? SORT_MAP["date-desc"];
+  const orderBy = SORT_MAP[filters?.sortBy ?? "time-asc"] ?? SORT_MAP["time-asc"];
   const rows = await prisma.order.findMany({ where, orderBy, include });
   return rows.map(mapOrder);
 }
@@ -105,6 +107,21 @@ export async function getOrderCountsByMonth(year: number, month: number): Promis
   return counts;
 }
 
+export async function getOrdersForWeek(days: string[]): Promise<OrderWithRelations[]> {
+  if (days.length === 0) return [];
+  const rows = await prisma.order.findMany({
+    where: {
+      orderDate: {
+        gte: toDate(days[0]),
+        lte: new Date(days[days.length - 1] + "T23:59:59.999Z"),
+      },
+    },
+    orderBy: { orderDate: "asc" },
+    include,
+  });
+  return rows.map(mapOrder);
+}
+
 async function nextOrderNumber(): Promise<number> {
   const last = await prisma.order.findFirst({ orderBy: { orderNumber: "desc" }, select: { orderNumber: true } });
   return (last?.orderNumber ?? 0) + 1;
@@ -119,9 +136,8 @@ export async function createOrder(data: unknown, photoDataUrls: string[] = []) {
   const order = await prisma.order.create({
     data: {
       orderNumber,
-      orderDate: toDate(parsed.data.orderDate),
+      orderDate:     toDate(parsed.data.orderDate),
       clientId:      parsed.data.clientId,
-      productId:     parsed.data.productId,
       paymentTypeId: parsed.data.paymentTypeId,
       statusId:      parsed.data.statusId,
       totalValue:    parsed.data.totalValue,
@@ -129,6 +145,9 @@ export async function createOrder(data: unknown, photoDataUrls: string[] = []) {
       deliveryFee:   parsed.data.deliveryFee ?? 0,
       notes:         parsed.data.notes || null,
       deliveryNotes: parsed.data.deliveryNotes || null,
+      orderProducts: {
+        create: parsed.data.products.map(({ productId, quantity }) => ({ productId, quantity })),
+      },
       photos: {
         create: photoDataUrls.map((filePath) => ({ filePath })),
       },
@@ -142,12 +161,13 @@ export async function updateOrder(id: string, data: unknown, newPhotoDataUrls: s
   const parsed = orderSchema.safeParse(data);
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors };
 
+  await prisma.orderProduct.deleteMany({ where: { orderId: id } });
+
   await prisma.order.update({
     where: { id },
     data: {
       orderDate:     toDate(parsed.data.orderDate),
       clientId:      parsed.data.clientId,
-      productId:     parsed.data.productId,
       paymentTypeId: parsed.data.paymentTypeId,
       statusId:      parsed.data.statusId,
       totalValue:    parsed.data.totalValue,
@@ -155,6 +175,9 @@ export async function updateOrder(id: string, data: unknown, newPhotoDataUrls: s
       deliveryFee:   parsed.data.deliveryFee ?? 0,
       notes:         parsed.data.notes || null,
       deliveryNotes: parsed.data.deliveryNotes || null,
+      orderProducts: {
+        create: parsed.data.products.map(({ productId, quantity }) => ({ productId, quantity })),
+      },
       photos: newPhotoDataUrls.length > 0 ? {
         create: newPhotoDataUrls.map((filePath) => ({ filePath })),
       } : undefined,
@@ -171,5 +194,15 @@ export async function deleteOrder(id: string) {
 
 export async function deleteOrderPhoto(id: string) {
   await prisma.orderPhoto.delete({ where: { id } });
+  return { success: true };
+}
+
+export async function updateOrderDay(id: string, newDate: string) {
+  await prisma.order.update({ where: { id }, data: { orderDate: toDate(newDate) } });
+  return { success: true };
+}
+
+export async function updateOrderQuickFields(id: string, fields: { pickupHour?: string | null; statusId?: string }) {
+  await prisma.order.update({ where: { id }, data: fields });
   return { success: true };
 }

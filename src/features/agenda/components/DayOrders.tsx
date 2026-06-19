@@ -7,14 +7,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
 import { getOrdersByDate } from "@/features/orders/actions";
-import type { Client, Product, OrderStatus } from "@/lib/types";
+import type { OrderWithRelations } from "@/lib/types";
 
-type DayOrder = {
-  id: string; orderNumber: number;
-  client: Client; product: Product; status: OrderStatus;
-};
-
-type State = { loading: boolean; orders: DayOrder[] };
+type State = { loading: boolean; orders: OrderWithRelations[] };
 
 interface Props {
   selectedDate: string | null;
@@ -28,7 +23,7 @@ export function DayOrders({ selectedDate }: Props) {
     // Only setState in async callbacks — avoids sync setState in effect body
     let alive = true;
     getOrdersByDate(selectedDate).then((data) => {
-      if (alive) setState({ loading: false, orders: data as DayOrder[] });
+      if (alive) setState({ loading: false, orders: data });
     });
     return () => { alive = false; setState((s) => ({ ...s, loading: false })); };
   }, [selectedDate]);
@@ -56,7 +51,7 @@ export function DayOrders({ selectedDate }: Props) {
                   </Badge>
                 </div>
                 <p className="font-medium text-sm">{o.client.name}</p>
-                <p className="text-muted-foreground text-sm">{o.product.name}</p>
+                <p className="text-muted-foreground text-sm">{o.orderProducts.map((op) => op.product.name).join(", ")}</p>
                 <div className="flex items-center gap-1 text-muted-foreground text-xs">
                   <Phone size={12} />
                   <span>{o.client.phone}</span>

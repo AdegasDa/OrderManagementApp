@@ -3,7 +3,7 @@
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin, { type DateClickArg } from "@fullcalendar/interaction";
-import type { EventContentArg, EventClickArg, DatesSetArg } from "@fullcalendar/core";
+import type { EventClickArg, DatesSetArg, DayCellContentArg } from "@fullcalendar/core";
 import ptLocale from "@fullcalendar/core/locales/pt";
 
 interface Props {
@@ -13,27 +13,7 @@ interface Props {
   onMonthChange: (year: number, month: number) => void;
 }
 
-function EventBlock({ info }: { info: EventContentArg }) {
-  const count = info.event.extendedProps.count as number;
-  return (
-    <div className="flex justify-center w-full px-0.5">
-      <div className="flex items-center justify-center gap-1 rounded-md bg-primary text-primary-foreground cursor-pointer select-none w-full px-1 py-1 min-w-0 overflow-hidden">
-        <span className="text-xs font-bold leading-none shrink-0">{count}</span>
-        <span className="text-[9px] font-medium leading-none opacity-90 truncate hidden sm:block">
-          {count === 1 ? "enc." : "enc."}
-        </span>
-      </div>
-    </div>
-  );
-}
-
 export function AgendaCalendar({ eventCounts, selectedDate, onDaySelect, onMonthChange }: Props) {
-  const events = Object.entries(eventCounts).map(([date, count]) => ({
-    date,
-    title: String(count),
-    extendedProps: { count },
-  }));
-
   function handleDatesSet(arg: DatesSetArg) {
     // FullCalendar fires this on every view change; derive the displayed month
     // from the start of the current range (start is the first day visible, which
@@ -46,24 +26,18 @@ export function AgendaCalendar({ eventCounts, selectedDate, onDaySelect, onMonth
   return (
     <div className="rounded-lg border bg-card p-4 agenda-calendar">
       <style>{`
-        .agenda-calendar .fc-daygrid-event-harness {
-          margin-top: 2px;
-          overflow: hidden;
-          max-width: 100%;
-        }
-        .agenda-calendar .fc-event {
-          border: none !important;
-          background: transparent !important;
-          padding: 0 1px;
-          overflow: hidden;
-          max-width: 100%;
-        }
-        .agenda-calendar .fc-event-main {
-          padding: 0;
-          overflow: hidden;
-        }
         .agenda-calendar .fc-daygrid-day-frame {
-          overflow: hidden;
+          overflow: visible;
+          min-height: 0 !important;
+          height: 62px;
+          display: flex !important;
+          align-items: center;
+          justify-content: center;
+        }
+        .agenda-calendar .fc-daygrid-day-top {
+          justify-content: center;
+          padding: 0;
+          flex: none;
         }
         .agenda-calendar .fc-daygrid-day {
           cursor: pointer;
@@ -83,14 +57,17 @@ export function AgendaCalendar({ eventCounts, selectedDate, onDaySelect, onMonth
         .agenda-calendar .fc-button-primary:hover { opacity: 0.85; }
         .agenda-calendar .fc-button-primary:disabled { opacity: 0.5; }
         .agenda-calendar .fc-toolbar-title {
-          font-size: 1rem !important;
+          font-size: 1.15rem !important;
           font-weight: 600 !important;
         }
         .agenda-calendar .fc-col-header-cell-cushion,
         .agenda-calendar .fc-daygrid-day-number {
           color: hsl(var(--foreground));
           text-decoration: none;
-          font-size: 0.8rem;
+          font-size: 0.9rem;
+        }
+        .agenda-calendar .fc-day-other {
+          background: hsl(var(--card)) !important;
         }
         .agenda-calendar .fc-day-today {
           background: hsl(var(--accent) / 0.3) !important;
@@ -99,9 +76,9 @@ export function AgendaCalendar({ eventCounts, selectedDate, onDaySelect, onMonth
           background: hsl(var(--primary));
           color: hsl(var(--primary-foreground));
           border-radius: 50%;
-          width: 22px;
-          height: 22px;
-          display: flex;
+          width: 26px;
+          height: 26px;
+          display: inline-flex;
           align-items: center;
           justify-content: center;
         }
@@ -116,16 +93,46 @@ export function AgendaCalendar({ eventCounts, selectedDate, onDaySelect, onMonth
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         locale={ptLocale}
-        events={events}
+        events={[]}
         dateClick={(arg: DateClickArg) => onDaySelect(arg.dateStr)}
         eventClick={(arg: EventClickArg) => onDaySelect(arg.event.startStr)}
-        eventContent={(info) => <EventBlock info={info} />}
+        dayCellContent={(arg: DayCellContentArg) => {
+          const d = arg.date;
+          const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+          const count = eventCounts[key] ?? 0;
+          return (
+            <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "32px", height: "32px" }}>
+              <span className="fc-daygrid-day-number" style={{ lineHeight: 1 }}>{arg.dayNumberText}</span>
+              {count > 0 && (
+                <span style={{
+                  position: "absolute",
+                  top: "-4px",
+                  right: "-6px",
+                  minWidth: "16px",
+                  height: "16px",
+                  padding: "0 3px",
+                  borderRadius: "999px",
+                  fontSize: "10px",
+                  fontWeight: 700,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: "hsl(0 0% 90%)",
+                  color: "hsl(0 0% 20%)",
+                  lineHeight: 1,
+                }}>
+                  {count}
+                </span>
+              )}
+            </div>
+          );
+        }}
         dayCellClassNames={(arg) => arg.dateStr === selectedDate ? ["fc-day-selected"] : []}
         datesSet={handleDatesSet}
-        headerToolbar={{ left: "prev,next today", center: "title", right: "" }}
+        headerToolbar={{ left: "prev", center: "title", right: "next" }}
         height="auto"
-        dayMaxEvents={2}
-        eventDisplay="block"
+        showNonCurrentDates={false}
+        fixedWeekCount={false}
       />
     </div>
   );

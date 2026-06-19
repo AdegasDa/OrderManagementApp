@@ -141,7 +141,7 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4 items-start">
+            <div className="grid grid-cols-[5fr_8fr] gap-4 items-start">
               <FormField control={form.control} name="orderDate" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Data da Encomenda</FormLabel>
@@ -156,7 +156,7 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
                   <Select value={field.value || null} onValueChange={(v) => field.onChange(v ?? field.value)}
                     items={clients.map((c) => ({ value: c.id, label: c.name }))}>
                     <FormControl>
-                      <SelectTrigger className="w-full"><SelectValue placeholder="Selecionar cliente" /></SelectTrigger>
+                      <SelectTrigger className="w-full h-10"><SelectValue placeholder="Selecionar cliente" /></SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
@@ -220,7 +220,7 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
                 <div key={field.id} className="flex gap-2 items-start">
                   {/* Product select */}
                   <FormField control={form.control} name={`products.${index}.productId`} render={({ field: f }) => (
-                    <FormItem className="flex-1 min-w-0">
+                    <FormItem className="w-[55%] shrink min-w-0">
                       {index === 0 && <FormLabel>Produto</FormLabel>}
                       <Select value={f.value || null} onValueChange={(v) => f.onChange(v ?? f.value)}
                         items={products.map((p) => ({ value: p.id, label: p.name }))}>

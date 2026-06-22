@@ -4,11 +4,12 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { OrderForm } from "./OrderForm";
-import type { OrderWithRelations, Client, Product, PaymentType, OrderStatus } from "@/lib/types";
+import type { OrderWithRelations, Product, PaymentType, OrderStatus } from "@/lib/types";
+import type { ClientOption } from "@/components/ui/client-combobox";
 
 interface Props {
   order: OrderWithRelations;
-  clients: Pick<Client, "id" | "name">[];
+  clients: ClientOption[];
   products: Pick<Product, "id" | "name" | "salePrice">[];
   paymentTypes: PaymentType[];
   statuses: OrderStatus[];

@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ClientCombobox, type ClientOption } from "@/components/ui/client-combobox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -21,7 +22,7 @@ import { formatCurrency } from "@/lib/utils";
 import { orderSchema, type OrderFormValues } from "../schema";
 import { DecimalInput } from "@/components/ui/decimal-input";
 import { createOrder, updateOrder, deleteOrderPhoto } from "../actions";
-import type { Client, Product, PaymentType, OrderStatus, OrderPhoto, OrderProduct } from "@/lib/types";
+import type { Product, PaymentType, OrderStatus, OrderPhoto, OrderProduct } from "@/lib/types";
 
 type FullOrder = {
   id: string; orderNumber: number; orderDate: string; clientId: string;
@@ -31,7 +32,7 @@ type FullOrder = {
 };
 
 interface Props {
-  clients: Pick<Client, "id" | "name">[];
+  clients: ClientOption[];
   products: Pick<Product, "id" | "name" | "salePrice">[];
   paymentTypes: PaymentType[];
   statuses: OrderStatus[];
@@ -167,31 +168,27 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-[5fr_8fr] gap-4 items-center">
-              <FormField control={form.control} name="orderDate" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Data da Encomenda</FormLabel>
-                  <FormControl><Input type="date" {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} />
+            <FormField control={form.control} name="orderDate" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Data da Encomenda</FormLabel>
+                <FormControl><Input type="date" className="w-fit" {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
 
-              <FormField control={form.control} name="clientId" render={({ field }) => (
-                <FormItem className="min-w-0">
-                  <FormLabel>Cliente</FormLabel>
-                  <Select value={field.value || null} onValueChange={(v) => field.onChange(v ?? field.value)}
-                    items={clients.map((c) => ({ value: c.id, label: c.name }))}>
-                    <FormControl>
-                      <SelectTrigger className="w-full h-10"><SelectValue placeholder="Selecionar cliente" /></SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )} />
-            </div>
+            <FormField control={form.control} name="clientId" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cliente</FormLabel>
+                <FormControl>
+                  <ClientCombobox
+                    clients={clients}
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
 
             <div className="grid grid-cols-[5fr_4fr] gap-4 items-start">
               <FormField control={form.control} name="paymentTypeId" render={({ field }) => (

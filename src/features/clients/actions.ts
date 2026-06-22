@@ -20,10 +20,10 @@ export async function getClients(page = 0): Promise<{ items: Client[]; total: nu
 }
 
 /** Returns all clients (id + name only) for form dropdowns — no pagination. */
-export async function getAllClients(): Promise<Pick<Client, "id" | "name">[]> {
+export async function getAllClients(): Promise<Pick<Client, "id" | "name" | "phone" | "source">[]> {
   return prisma.client.findMany({
     orderBy: { name: "asc" },
-    select: { id: true, name: true },
+    select: { id: true, name: true, phone: true, source: true },
   });
 }
 

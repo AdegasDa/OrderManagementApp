@@ -101,6 +101,11 @@ async function main() {
     d.setDate(d.getDate() - n);
     return d;
   }
+  function daysAhead(n: number) {
+    const d = new Date(now);
+    d.setDate(d.getDate() + n);
+    return d;
+  }
 
   const ordersData = [
     // --- Novo ---
@@ -137,6 +142,15 @@ async function main() {
     { clientIdx: 10, productIdx: 5, ptName: "Transferência",stName: "Entregue",     date: daysAgo(5),  total: 44.00,  advance: 44,    notes: "2x puzzles aniversário",    deliveryNotes: "" },
     { clientIdx: 12, productIdx: 9, ptName: "MB Way",       stName: "Novo",         date: daysAgo(0),  total: 16.99,  advance: 0,     notes: "Boné personalizado",        deliveryNotes: "" },
     { clientIdx: 14, productIdx: 4, ptName: "Cartão",       stName: "Em Progresso", date: daysAgo(2),  total: 17.98,  advance: 9,     notes: "2x porta-chaves",           deliveryNotes: "" },
+    // --- Upcoming orders (next 7 days) ───────────────────────────────────────
+    { clientIdx: 0,  productIdx: 0, ptName: "MB Way",       stName: "Novo",         date: daysAhead(1), total: 24.99, advance: 10,   notes: "Tamanho M, cor vermelha",   deliveryNotes: "" },
+    { clientIdx: 2,  productIdx: 1, ptName: "Numerário",    stName: "Em Progresso", date: daysAhead(1), total: 12.50, advance: 0,    notes: "Caneca aniversário",        deliveryNotes: "" },
+    { clientIdx: 5,  productIdx: 6, ptName: "Cartão",       stName: "Novo",         date: daysAhead(2), total: 19.99, advance: 10,   notes: "T-shirt tamanho S",         deliveryNotes: "Ligar antes" },
+    { clientIdx: 7,  productIdx: 3, ptName: "Transferência",stName: "Em Progresso", date: daysAhead(2), total: 35.00, advance: 15,   notes: "Quadro 30×40",              deliveryNotes: "" },
+    { clientIdx: 9,  productIdx: 2, ptName: "MB Way",       stName: "Pronto",       date: daysAhead(3), total: 18.00, advance: 18,   notes: "Almofada foto bebé",        deliveryNotes: "Entregar na loja" },
+    { clientIdx: 11, productIdx: 8, ptName: "Numerário",    stName: "Novo",         date: daysAhead(4), total: 11.50, advance: 0,    notes: "Tote bag personalizada",    deliveryNotes: "" },
+    { clientIdx: 13, productIdx: 5, ptName: "Cartão",       stName: "Em Progresso", date: daysAhead(4), total: 22.00, advance: 11,   notes: "Puzzle 500 peças",          deliveryNotes: "" },
+    { clientIdx: 1,  productIdx: 9, ptName: "MB Way",       stName: "Novo",         date: daysAhead(5), total: 16.99, advance: 0,    notes: "Boné bordado nome",         deliveryNotes: "" },
   ];
 
   let nextNumber = (await prisma.order.findFirst({ orderBy: { orderNumber: "desc" }, select: { orderNumber: true } }))?.orderNumber ?? 0;

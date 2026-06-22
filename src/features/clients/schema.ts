@@ -4,7 +4,7 @@ export const clientSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
   phone: z.string().min(1, "Telefone é obrigatório"),
   source: z.enum(["STORE", "INSTAGRAM", "WHATSAPP"]),
-  socialHandle: z.string().optional(),
+  socialHandle: z.string().transform(v => v || undefined).optional(),
 });
 
 export type ClientFormValues = z.infer<typeof clientSchema>;

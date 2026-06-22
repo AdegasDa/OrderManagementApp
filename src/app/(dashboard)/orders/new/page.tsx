@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getAllClients } from "@/features/clients/actions";
 import { getAllProducts } from "@/features/products/actions";
 import { getPaymentTypes } from "@/features/payments/actions";

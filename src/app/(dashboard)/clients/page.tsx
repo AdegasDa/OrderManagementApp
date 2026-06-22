@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { Suspense } from "react";
 import { getClients } from "@/features/clients/actions";
 import { ClientList } from "@/features/clients/components/ClientList";

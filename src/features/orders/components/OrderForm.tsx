@@ -1,6 +1,5 @@
 "use client";
 
-import { upload } from "@vercel/blob/client";
 import { useState, useEffect } from "react";
 import { useForm, useWatch, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -100,20 +99,24 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
 
   async function uploadFiles(): Promise<string[]> {
     if (newFiles.length === 0) return [];
-    const results = await Promise.all(
-      newFiles.map((file) =>
-        upload(file.name, file, { access: "public", handleUploadUrl: "/api/upload" })
-      )
-    );
-    return results.map((r) => r.url);
+    const formData = new FormData();
+    newFiles.forEach((f) => formData.append("file", f));
+    const res = await fetch("/api/upload", { method: "POST", body: formData });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({})) as { error?: string };
+      throw new Error(body.error ?? "Upload falhou");
+    }
+    const { urls } = await res.json() as { urls: string[] };
+    return urls;
   }
 
   async function onSubmit(values: OrderFormValues) {
     let filePaths: string[] = [];
     try {
       filePaths = await uploadFiles();
-    } catch {
-      toast.error("Erro ao fazer upload das fotos. Verifique a ligação e tente novamente.");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Erro desconhecido";
+      toast.error(`Erro ao fazer upload das fotos: ${msg}`);
       return;
     }
     const result = order

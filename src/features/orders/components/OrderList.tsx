@@ -87,7 +87,12 @@ export function OrderList({ orders: initial }: { orders: OrderWithRelations[] })
               </div>
 
               <p className="font-semibold text-sm leading-tight">{o.client.name}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{formatDate(o.orderDate)}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {formatDate(o.orderDate)}
+                {(o.client.phone || o.client.socialHandle) && (
+                  <> · {o.client.phone || o.client.socialHandle}</>
+                )}
+              </p>
 
               <div className="flex items-center justify-between gap-2 mt-1">
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground min-w-0">
@@ -143,7 +148,12 @@ export function OrderList({ orders: initial }: { orders: OrderWithRelations[] })
                 >
                   <TableCell className="font-mono font-semibold">#{o.orderNumber}</TableCell>
                   <TableCell className="whitespace-nowrap">{formatDate(o.orderDate)}</TableCell>
-                  <TableCell>{o.client.name}</TableCell>
+                  <TableCell>
+                    <span className="block">{o.client.name}</span>
+                    {(o.client.phone || o.client.socialHandle) && (
+                      <span className="text-xs text-muted-foreground">{o.client.phone || o.client.socialHandle}</span>
+                    )}
+                  </TableCell>
                   <TableCell>{o.orderProducts.map((op) => op.product.name).join(", ")}</TableCell>
                   <TableCell>
                     {hasDelivery

@@ -170,8 +170,7 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
           <CardContent className="space-y-4">
             <FormField control={form.control} name="orderDate" render={({ field }) => (
               <FormItem>
-                <FormLabel>Data da Encomenda</FormLabel>
-                <FormControl><Input type="date" className="w-fit" {...field} /></FormControl>
+                <FormControl><Input type="date" className="w-full" {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />

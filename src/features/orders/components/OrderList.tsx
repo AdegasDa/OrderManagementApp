@@ -86,13 +86,12 @@ export function OrderList({ orders: initial }: { orders: OrderWithRelations[] })
                 </div>
               </div>
 
-              <p className="font-semibold text-sm leading-tight mb-1">{o.client.name}</p>
+              <p className="font-semibold text-sm leading-tight">{o.client.name}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{formatDate(o.orderDate)}</p>
 
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center justify-between gap-2 mt-1">
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground min-w-0">
                   <span className="truncate">{o.orderProducts.map((op) => op.product.name).join(", ")}</span>
-                  <span>·</span>
-                  <span className="shrink-0">{formatDate(o.orderDate)}</span>
                   {o.deliveryFee > 0 && (
                     <>
                       <span>·</span>

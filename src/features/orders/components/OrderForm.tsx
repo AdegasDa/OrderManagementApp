@@ -108,7 +108,13 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
   }
 
   async function onSubmit(values: OrderFormValues) {
-    const filePaths = await uploadFiles();
+    let filePaths: string[] = [];
+    try {
+      filePaths = await uploadFiles();
+    } catch {
+      toast.error("Erro ao fazer upload das fotos. Verifique a ligação e tente novamente.");
+      return;
+    }
     const result = order
       ? await updateOrder(order.id, values, filePaths)
       : await createOrder(values, filePaths);

@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { formatCurrency } from "@/lib/utils";
 import { orderSchema, type OrderFormValues } from "../schema";
+import { DecimalInput } from "@/components/ui/decimal-input";
 import { createOrder, updateOrder, deleteOrderPhoto } from "../actions";
 import type { Client, Product, PaymentType, OrderStatus, OrderPhoto, OrderProduct } from "@/lib/types";
 
@@ -275,10 +276,7 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
                         <FormItem className="w-24">
                           <FormLabel className="text-xs text-muted-foreground">Preço (€)</FormLabel>
                           <FormControl>
-                            <Input type="number" min="0" step="0.01"
-                              placeholder="0.00"
-                              value={!f.value || isNaN(f.value) ? "" : f.value}
-                              onChange={(e) => f.onChange(isNaN(e.target.valueAsNumber) ? 0 : e.target.valueAsNumber)} />
+                            <DecimalInput placeholder="0.00" value={f.value} onChange={f.onChange} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -334,9 +332,7 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
                   <Truck size={13} className="text-muted-foreground" /> Custo de Entrega (€)
                 </FormLabel>
                 <FormControl>
-                  <Input type="number" step="0.01" min="0" placeholder="0.00"
-                    value={isNaN(field.value) ? "" : field.value}
-                    onChange={(e) => field.onChange(isNaN(e.target.valueAsNumber) ? 0 : e.target.valueAsNumber)} />
+                  <DecimalInput placeholder="0.00" value={field.value} onChange={field.onChange} />
                 </FormControl>
                 <p className="text-xs text-muted-foreground">Deixar 0 se não houver entrega</p>
                 <FormMessage />
@@ -350,9 +346,7 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
                 <FormItem>
                   <FormLabel>Valor Total (€)</FormLabel>
                   <FormControl>
-                    <Input type="number" step="0.01" min="0"
-                      value={isNaN(field.value) ? "" : field.value}
-                      onChange={(e) => field.onChange(isNaN(e.target.valueAsNumber) ? 0 : e.target.valueAsNumber)} />
+                    <DecimalInput placeholder="0.00" value={field.value} onChange={field.onChange} />
                   </FormControl>
                   <p className="text-xs text-muted-foreground">Calculado automaticamente.</p>
                   <FormMessage />
@@ -363,9 +357,7 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
                 <FormItem>
                   <FormLabel>Valor Adiantado (€)</FormLabel>
                   <FormControl>
-                    <Input type="number" step="0.01" min="0"
-                      value={isNaN(field.value) ? "" : field.value}
-                      onChange={(e) => field.onChange(isNaN(e.target.valueAsNumber) ? 0 : e.target.valueAsNumber)} />
+                    <DecimalInput placeholder="0.00" value={field.value} onChange={field.onChange} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

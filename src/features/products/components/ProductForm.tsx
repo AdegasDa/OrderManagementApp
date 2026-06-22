@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DecimalInput } from "@/components/ui/decimal-input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { productSchema, type ProductFormValues } from "../schema";
@@ -60,9 +61,7 @@ export function ProductForm({ product, onSuccess }: Props) {
           <FormItem>
             <FormLabel>Preço de Venda (€)</FormLabel>
             <FormControl>
-                <Input type="number" step="0.01" min="0"
-                  value={isNaN(field.value) ? "" : field.value}
-                  onChange={(e) => field.onChange(isNaN(e.target.valueAsNumber) ? 0 : e.target.valueAsNumber)} />
+                <DecimalInput placeholder="0.00" value={field.value} onChange={field.onChange} />
               </FormControl>
             <FormMessage />
           </FormItem>

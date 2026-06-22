@@ -63,20 +63,7 @@ export function ClientCombobox({ clients, value, onChange, placeholder = "Seleci
 
       {open && (
         <div className="absolute z-50 top-[calc(100%+4px)] left-0 w-full min-w-[260px] rounded-md border bg-popover shadow-md">
-          <Command
-            filter={(itemValue, search) => {
-              const c = clients.find((cl) => cl.id === itemValue);
-              if (!c) return 0;
-              const q = search.toLowerCase();
-              const sourceLabel = (SOURCE_LABELS[c.source] ?? c.source).toLowerCase();
-              return (
-                c.name.toLowerCase().includes(q) ||
-                c.phone.toLowerCase().includes(q) ||
-                c.source.toLowerCase().includes(q) ||
-                sourceLabel.includes(q)
-              ) ? 1 : 0;
-            }}
-          >
+          <Command>
             <CommandInput placeholder="Nome, contacto ou rede social…" />
             <CommandList>
               <CommandEmpty>Nenhum cliente encontrado.</CommandEmpty>
@@ -85,6 +72,7 @@ export function ClientCombobox({ clients, value, onChange, placeholder = "Seleci
                   <CommandItem
                     key={c.id}
                     value={c.id}
+                    keywords={[c.name, c.phone, c.source, SOURCE_LABELS[c.source] ?? ""]}
                     onSelect={(val) => {
                       onChange(val === value ? "" : val);
                       setOpen(false);

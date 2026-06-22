@@ -37,7 +37,6 @@ export function ClientForm({ client, onSuccess }: Props) {
   });
 
   const watchedSource = form.watch("source");
-  const showHandle = watchedSource === "INSTAGRAM" || watchedSource === "WHATSAPP";
 
   async function onSubmit(values: ClientFormValues) {
     const result = client
@@ -97,28 +96,26 @@ export function ClientForm({ client, onSuccess }: Props) {
             <FormMessage />
           </FormItem>
         )} />
-        {showHandle && (
-          <FormField control={form.control} name="socialHandle" render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                @ {sourceLabels[watchedSource] ?? watchedSource}
-              </FormLabel>
-              <FormControl>
-                <div className="flex items-center">
-                  <span className="flex h-10 items-center rounded-l-md border border-r-0 border-input bg-muted px-3 text-sm text-muted-foreground">@</span>
-                  <Input
-                    className="rounded-l-none"
-                    placeholder={`utilizador_${watchedSource.toLowerCase()}`}
-                    {...field}
-                    value={field.value ?? ""}
-                    onChange={(e) => field.onChange(e.target.value.replace(/^@/, ""))}
-                  />
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )} />
-        )}
+        <FormField control={form.control} name="socialHandle" render={({ field }) => (
+          <FormItem>
+            <FormLabel>
+              @ {sourceLabels[watchedSource] ?? watchedSource}
+            </FormLabel>
+            <FormControl>
+              <div className="flex items-center">
+                <span className="flex h-10 items-center rounded-l-md border border-r-0 border-input bg-muted px-3 text-sm text-muted-foreground">@</span>
+                <Input
+                  className="rounded-l-none"
+                  placeholder={`utilizador_${watchedSource.toLowerCase()}`}
+                  {...field}
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(e.target.value.replace(/^@/, ""))}
+                />
+              </div>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
 
         <Button type="submit" disabled={form.formState.isSubmitting} className="w-full">
           {form.formState.isSubmitting ? "A guardar…" : client ? "Atualizar" : "Criar Cliente"}

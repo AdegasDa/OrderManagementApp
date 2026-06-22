@@ -8,7 +8,7 @@ export async function POST(request: Request) {
 
     const urls = await Promise.all(
       files.map((file) =>
-        put(file.name, file, { access: "public", addRandomSuffix: true }).then((r) => r.url)
+        put(file.name, file, { access: "private", addRandomSuffix: true }).then((r) => r.url)
       )
     );
 

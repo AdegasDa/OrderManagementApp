@@ -130,8 +130,14 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
     router.push("/orders");
   }
 
+  function photoSrc(filePath: string) {
+    if (filePath.startsWith("data:") || filePath.startsWith("blob:")) return filePath;
+    if (filePath.startsWith("https://")) return `/api/photo?url=${encodeURIComponent(filePath)}`;
+    return filePath;
+  }
+
   const allPhotos = [
-    ...photos.map((p) => ({ src: p.filePath })),
+    ...photos.map((p) => ({ src: photoSrc(p.filePath) })),
     ...newPreviews.map((src) => ({ src })),
   ];
 
@@ -439,7 +445,7 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
                   <div key={p.id} className="relative w-24 h-24 group">
                     <button type="button" onClick={() => setLightboxIndex(i)}
                       className="w-full h-full rounded-lg overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                      <img src={p.filePath} alt={`Foto ${i + 1}`}
+                      <img src={photoSrc(p.filePath)} alt={`Foto ${i + 1}`}
                         className="w-full h-full object-cover transition-transform group-hover:scale-105" />
                       <span className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg" />
                     </button>

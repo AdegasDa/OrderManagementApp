@@ -1,20 +1,22 @@
-import { put } from "@vercel/blob";
+import { handleUpload, type HandleUploadBody } from "@vercel/blob/next";
 import { NextResponse } from "next/server";
 
-export async function POST(request: Request) {
+export async function POST(request: Request): Promise<NextResponse> {
+  const body = (await request.json()) as HandleUploadBody;
+
   try {
-    const formData = await request.formData();
-    const files = formData.getAll("file") as File[];
+    const jsonResponse = await handleUpload({
+      body,
+      request,
+      onBeforeGenerateToken: async () => ({
+        allowedContentTypes: ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"],
+        maximumSizeInBytes: 10 * 1024 * 1024, // 10 MB per file
+      }),
+      onUploadCompleted: async () => {},
+    });
 
-    const urls = await Promise.all(
-      files.map((file) =>
-        put(file.name, file, { access: "public", addRandomSuffix: true }).then((r) => r.url)
-      )
-    );
-
-    return NextResponse.json({ urls });
-  } catch (err) {
-    console.error("Upload error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json(jsonResponse);
+  } catch (error) {
+    return NextResponse.json({ error: (error as Error).message }, { status: 400 });
   }
 }

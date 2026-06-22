@@ -1,5 +1,6 @@
 "use client";
 
+import { upload } from "@vercel/blob/client";
 import { useState, useEffect } from "react";
 import { useForm, useWatch, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -99,12 +100,12 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
 
   async function uploadFiles(): Promise<string[]> {
     if (newFiles.length === 0) return [];
-    const formData = new FormData();
-    newFiles.forEach((f) => formData.append("file", f));
-    const res = await fetch("/api/upload", { method: "POST", body: formData });
-    if (!res.ok) throw new Error("Erro ao fazer upload das fotos.");
-    const { urls } = await res.json() as { urls: string[] };
-    return urls;
+    const results = await Promise.all(
+      newFiles.map((file) =>
+        upload(file.name, file, { access: "public", handleUploadUrl: "/api/upload" })
+      )
+    );
+    return results.map((r) => r.url);
   }
 
   async function onSubmit(values: OrderFormValues) {

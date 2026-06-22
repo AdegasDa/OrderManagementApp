@@ -41,7 +41,7 @@ export function MobileNav() {
             ? "opacity-100 translate-y-0"
             : "opacity-0 translate-y-3 pointer-events-none"
         )}
-        style={{ bottom: "calc(7rem + env(safe-area-inset-bottom))" }}
+        style={{ bottom: "calc(6rem + env(safe-area-inset-bottom))" }}
       >
         <div className="p-2">
           {moreItems.map(({ href, label, icon: Icon }) => (
@@ -66,7 +66,7 @@ export function MobileNav() {
       {/* Floating island nav */}
       <nav
         className="md:hidden fixed left-4 right-4 z-50 bg-card/90 backdrop-blur-xl border border-border/40 rounded-full shadow-2xl"
-        style={{ bottom: "calc(1.75rem + env(safe-area-inset-bottom))" }}
+        style={{ bottom: "calc(1rem + env(safe-area-inset-bottom))" }}
       >
         <div className="flex h-16 px-1">
           {mainItems.map(({ href, label, icon: Icon }) => {

@@ -69,7 +69,7 @@ export function MobileNav() {
         style={{ bottom: "calc(1rem + env(safe-area-inset-bottom))" }}
       >
         <div className="flex h-16 px-1">
-          {mainItems.map(({ href, label, icon: Icon }) => {
+          {mainItems.map(({ href, icon: Icon }) => {
             const active = pathname.startsWith(href);
             return (
               <Link

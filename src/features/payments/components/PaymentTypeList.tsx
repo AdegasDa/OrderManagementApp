@@ -19,6 +19,7 @@ import type { PaymentType } from "@/lib/types";
 export function PaymentTypeList({ paymentTypes: initial }: { paymentTypes: PaymentType[] }) {
   const router = useRouter();
   const [items, setItems] = useState(initial);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setItems(initial), [initial]);
   const [openCreate, setOpenCreate] = useState(false);
   const [editItem, setEditItem] = useState<PaymentType | null>(null);

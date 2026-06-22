@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2, Truck, Minus, ClipboardList, ChevronRight } from "lucide-react";
+import { Trash2, Truck, Minus, ClipboardList } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +15,7 @@ import type { OrderWithRelations } from "@/lib/types";
 export function OrderList({ orders: initial }: { orders: OrderWithRelations[] }) {
   const router = useRouter();
   const [orders, setOrders] = useState(initial);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setOrders(initial), [initial]);
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
 

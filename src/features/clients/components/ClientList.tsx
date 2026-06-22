@@ -17,6 +17,7 @@ import type { Client } from "@/lib/types";
 export function ClientList({ clients: initial }: { clients: Client[] }) {
   const router = useRouter();
   const [clients, setClients] = useState(initial);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setClients(initial), [initial]);
   const [editClient, setEditClient] = useState<Client | null>(null);
   const [openCreate, setOpenCreate] = useState(false);

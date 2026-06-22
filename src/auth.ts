@@ -1,4 +1,8 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore – next-auth@5 beta has a peer-dep conflict with Next.js 16; ignore until released
 import NextAuth from "next-auth";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import Credentials from "next-auth/providers/credentials";
 
 // Simple in-memory rate limiter — resets on cold start.
@@ -37,7 +41,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         username: { label: "Utilizador" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials, request) {
+      async authorize(credentials: Record<string, unknown>, request: Request) {
         const ip =
           request?.headers?.get("x-forwarded-for")?.split(",")[0].trim() ??
           "unknown";
@@ -67,7 +71,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   pages: { signIn: "/login" },
   session: { strategy: "jwt" },
   callbacks: {
-    authorized({ auth }) {
+    authorized({ auth }: { auth: { user?: unknown } | null }) {
       return !!auth?.user;
     },
   },

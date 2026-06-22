@@ -33,8 +33,8 @@ async function main() {
     prisma.orderStatus.findMany(),
   ]);
 
-  const ptByName  = Object.fromEntries(pt.map((p) => [p.name, p.id]));
-  const stByName  = Object.fromEntries(st.map((s) => [s.name, s.id]));
+  const ptByName  = Object.fromEntries(pt.map((p: { name: string; id: string }) => [p.name, p.id]));
+  const stByName  = Object.fromEntries(st.map((s: { name: string; id: string }) => [s.name, s.id]));
 
   // ── Clients ───────────────────────────────────────────────────────────────────
   const clientsData = [
@@ -92,7 +92,7 @@ async function main() {
   // ── Orders ────────────────────────────────────────────────────────────────────
   // Only create orders that don't already exist (check by orderNumber)
   const existingOrderNumbers = new Set(
-    (await prisma.order.findMany({ select: { orderNumber: true } })).map((o) => o.orderNumber)
+    (await prisma.order.findMany({ select: { orderNumber: true } })).map((o: { orderNumber: number }) => o.orderNumber)
   );
 
   const now = new Date();

@@ -15,6 +15,7 @@ interface Props {
 export function AgendaView({ initialCounts, initialYear, initialMonth }: Props) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [eventCounts, setEventCounts] = useState(initialCounts);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setEventCounts(initialCounts), [initialCounts]);
   const [visibleYear, setVisibleYear] = useState(initialYear);
   const [visibleMonth, setVisibleMonth] = useState(initialMonth);

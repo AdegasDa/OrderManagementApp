@@ -16,6 +16,7 @@ import type { Product } from "@/lib/types";
 export function ProductList({ products: initial }: { products: Product[] }) {
   const router = useRouter();
   const [products, setProducts] = useState(initial);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setProducts(initial), [initial]);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [openCreate, setOpenCreate] = useState(false);

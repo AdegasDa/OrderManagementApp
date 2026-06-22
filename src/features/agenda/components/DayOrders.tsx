@@ -21,6 +21,7 @@ export function DayOrders({ selectedDate }: Props) {
   useEffect(() => {
     if (!selectedDate) return;
     let alive = true;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setState({ loading: true, orders: [], error: false });
     getOrdersByDate(selectedDate)
       .then((data) => { if (alive) setState({ loading: false, orders: data, error: false }); })

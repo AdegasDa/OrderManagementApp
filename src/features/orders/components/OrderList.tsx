@@ -19,8 +19,14 @@ export function OrderList({ orders: initial }: { orders: OrderWithRelations[] })
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
 
   async function handleDelete(id: string) {
+    const snapshot = orders;
     setOrders((prev) => prev.filter((o) => o.id !== id));
-    await deleteOrder(id);
+    const result = await deleteOrder(id);
+    if ("error" in result) {
+      setOrders(snapshot);
+      toast.error("Erro ao eliminar encomenda.");
+      return;
+    }
     toast.success("Encomenda eliminada.");
     router.refresh();
   }

@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { formatCurrency } from "@/lib/utils";
 import { orderSchema, type OrderFormValues } from "../schema";
 import { DecimalInput } from "@/components/ui/decimal-input";
@@ -29,8 +30,8 @@ type FullOrder = {
 };
 
 interface Props {
-  clients: Client[];
-  products: Product[];
+  clients: Pick<Client, "id" | "name">[];
+  products: Pick<Product, "id" | "name" | "salePrice">[];
   paymentTypes: PaymentType[];
   statuses: OrderStatus[];
   order?: FullOrder;
@@ -93,9 +94,12 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
     setNewPreviews((prev) => prev.filter((_, i) => i !== index));
   }
 
-  async function removeExistingPhoto(id: string) {
+  const [pendingPhotoDelete, setPendingPhotoDelete] = useState<string | null>(null);
+
+  async function confirmPhotoDelete(id: string) {
     await deleteOrderPhoto(id);
     setPhotos((prev) => prev.filter((p) => p.id !== id));
+    setPendingPhotoDelete(null);
   }
 
   async function uploadFiles(): Promise<string[]> {
@@ -124,6 +128,14 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
       ? await updateOrder(order.id, values, filePaths)
       : await createOrder(values, filePaths);
     if ("error" in result) {
+      // Clean up blobs that were uploaded but whose DB write failed (F-02)
+      if (filePaths.length > 0) {
+        fetch("/api/upload", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ urls: filePaths }),
+        }).catch(() => {});
+      }
       toast.error("Erro ao guardar encomenda.");
       return;
     }
@@ -422,6 +434,12 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
             </CardTitle>
           </CardHeader>
           <CardContent>
+            <DeleteDialog
+              open={!!pendingPhotoDelete}
+              onOpenChange={(o) => !o && setPendingPhotoDelete(null)}
+              onConfirm={() => { if (pendingPhotoDelete) confirmPhotoDelete(pendingPhotoDelete); }}
+              description="Tem a certeza que quer eliminar esta foto? Esta ação não pode ser desfeita."
+            />
             {lightboxIndex !== null && (
               <PhotoLightbox
                 photos={allPhotos}
@@ -441,7 +459,7 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
                         className="w-full h-full object-cover transition-transform group-hover:scale-105" />
                       <span className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg" />
                     </button>
-                    <button type="button" onClick={() => removeExistingPhoto(p.id)}
+                    <button type="button" onClick={() => setPendingPhotoDelete(p.id)}
                       className="absolute -top-2 -right-2 bg-destructive text-white rounded-full w-5 h-5 flex items-center justify-center z-10 shadow">
                       <X size={12} />
                     </button>
@@ -481,7 +499,10 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
 
         {/* ── Actions ──────────────────────────────────────────────────── */}
         <div className="flex flex-col-reverse sm:flex-row gap-3 pt-2 pb-6">
-          <Button type="button" variant="outline" size="lg" className="sm:w-auto w-full h-12 text-base px-6" onClick={() => router.back()}>
+          <Button type="button" variant="outline" size="lg" className="sm:w-auto w-full h-12 text-base px-6" onClick={() => {
+            if (form.formState.isDirty && !confirm("Tem alterações não guardadas. Deseja sair?")) return;
+            router.push("/orders");
+          }}>
             <ArrowLeft size={18} /> Cancelar
           </Button>
           <Button type="submit" size="lg" className="sm:w-auto w-full h-12 text-base px-6" disabled={form.formState.isSubmitting}>

@@ -10,23 +10,6 @@ import { formatCurrency } from "@/lib/utils";
 import { deleteOrder, updateOrderQuickFields } from "../actions";
 import type { OrderWithRelations, OrderStatus } from "@/lib/types";
 
-const CLOSED_DAYS = new Set([0, 1]);
-
-function toLocalStr(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
-function getWorkingDays(n: number): string[] {
-  const days: string[] = [];
-  const date = new Date();
-  date.setHours(0, 0, 0, 0);
-  while (days.length < n) {
-    if (!CLOSED_DAYS.has(date.getDay())) days.push(toLocalStr(date));
-    date.setDate(date.getDate() + 1);
-  }
-  return days;
-}
-
 function formatDayLabel(dateStr: string): string {
   const date = new Date(dateStr + "T12:00:00");
   const today = new Date();
@@ -38,7 +21,6 @@ function formatDayLabel(dateStr: string): string {
   if (d.toDateString() === tomorrow.toDateString()) return "Amanhã";
   return date.toLocaleDateString("pt-PT", { weekday: "long", day: "numeric", month: "long" });
 }
-
 
 function sortDayOrders(orders: OrderWithRelations[], sortBy: string): OrderWithRelations[] {
   if (sortBy === "status") {
@@ -66,21 +48,37 @@ export function WeekView({ orders: initial, statuses, workingDays, sortBy = "tim
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
 
   async function handleDelete(id: string) {
+    const snapshot = orders;
     setOrders((prev) => prev.filter((o) => o.id !== id));
-    await deleteOrder(id);
+    const result = await deleteOrder(id);
+    if ("error" in result) {
+      setOrders(snapshot);
+      toast.error("Erro ao eliminar encomenda.");
+      return;
+    }
     toast.success("Encomenda eliminada.");
     router.refresh();
   }
 
   async function handleHourChange(id: string, hour: string) {
-    setOrders((prev) => prev.map((o) => o.id === id ? { ...o, pickupHour: hour || null } : o));
-    await updateOrderQuickFields(id, { pickupHour: hour || null });
+    const prev = orders.find((o) => o.id === id)?.pickupHour ?? null;
+    setOrders((all) => all.map((o) => o.id === id ? { ...o, pickupHour: hour || null } : o));
+    const result = await updateOrderQuickFields(id, { pickupHour: hour || null });
+    if ("error" in result) {
+      setOrders((all) => all.map((o) => o.id === id ? { ...o, pickupHour: prev } : o));
+      toast.error("Erro ao atualizar hora.");
+    }
   }
 
   async function handleStatusChange(id: string, statusId: string) {
+    const prevOrder = orders.find((o) => o.id === id)!;
     const status = statuses.find((s) => s.id === statusId)!;
-    setOrders((prev) => prev.map((o) => o.id === id ? { ...o, statusId, status } : o));
-    await updateOrderQuickFields(id, { statusId });
+    setOrders((all) => all.map((o) => o.id === id ? { ...o, statusId, status } : o));
+    const result = await updateOrderQuickFields(id, { statusId });
+    if ("error" in result) {
+      setOrders((all) => all.map((o) => o.id === id ? { ...o, statusId: prevOrder.statusId, status: prevOrder.status } : o));
+      toast.error("Erro ao atualizar estado.");
+    }
   }
 
   const byDay = new Map<string, OrderWithRelations[]>();

@@ -24,7 +24,12 @@ export function ProductList({ products: initial }: { products: Product[] }) {
   async function handleDelete(id: string) {
     const product = products.find((p) => p.id === id)!;
     setProducts((prev) => prev.filter((p) => p.id !== id));
-    await deleteProduct(id);
+    const result = await deleteProduct(id);
+    if ("error" in result) {
+      setProducts((prev) => [...prev, product].sort((a, b) => a.name.localeCompare(b.name)));
+      toast.error(typeof result.error === "string" ? result.error : "Erro ao eliminar produto.");
+      return;
+    }
     toast.success("Produto eliminado.", {
       action: {
         label: "Desfazer",

@@ -25,7 +25,12 @@ export function ClientList({ clients: initial }: { clients: Client[] }) {
   async function handleDelete(id: string) {
     const client = clients.find((c) => c.id === id)!;
     setClients((prev) => prev.filter((c) => c.id !== id));
-    await deleteClient(id);
+    const result = await deleteClient(id);
+    if ("error" in result) {
+      setClients((prev) => [...prev, client].sort((a, b) => a.name.localeCompare(b.name)));
+      toast.error(typeof result.error === "string" ? result.error : "Erro ao eliminar cliente.");
+      return;
+    }
     toast.success("Cliente eliminado.", {
       action: {
         label: "Desfazer",

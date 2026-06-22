@@ -9,23 +9,23 @@ import { formatDate } from "@/lib/utils";
 import { getOrdersByDate } from "@/features/orders/actions";
 import type { OrderWithRelations } from "@/lib/types";
 
-type State = { loading: boolean; orders: OrderWithRelations[] };
+type State = { loading: boolean; orders: OrderWithRelations[]; error: boolean };
 
 interface Props {
   selectedDate: string | null;
 }
 
 export function DayOrders({ selectedDate }: Props) {
-  const [{ loading, orders }, setState] = useState<State>({ loading: false, orders: [] });
+  const [{ loading, orders, error }, setState] = useState<State>({ loading: false, orders: [], error: false });
 
   useEffect(() => {
     if (!selectedDate) return;
-    // Only setState in async callbacks — avoids sync setState in effect body
     let alive = true;
-    getOrdersByDate(selectedDate).then((data) => {
-      if (alive) setState({ loading: false, orders: data });
-    });
-    return () => { alive = false; setState((s) => ({ ...s, loading: false })); };
+    setState({ loading: true, orders: [], error: false });
+    getOrdersByDate(selectedDate)
+      .then((data) => { if (alive) setState({ loading: false, orders: data, error: false }); })
+      .catch(() => { if (alive) setState({ loading: false, orders: [], error: true }); });
+    return () => { alive = false; };
   }, [selectedDate]);
 
   if (!selectedDate) return null;
@@ -36,7 +36,8 @@ export function DayOrders({ selectedDate }: Props) {
         Encomendas — {formatDate(selectedDate)}
       </h2>
       {loading && <p className="text-muted-foreground text-sm">A carregar…</p>}
-      {!loading && orders.length === 0 && (
+      {error && <p className="text-destructive text-sm">Erro ao carregar encomendas. Tente novamente.</p>}
+      {!loading && !error && orders.length === 0 && (
         <p className="text-muted-foreground text-sm">Nenhuma encomenda neste dia.</p>
       )}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

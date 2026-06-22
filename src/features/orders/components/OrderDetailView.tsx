@@ -8,8 +8,8 @@ import type { OrderWithRelations, Client, Product, PaymentType, OrderStatus } fr
 
 interface Props {
   order: OrderWithRelations;
-  clients: Client[];
-  products: Product[];
+  clients: Pick<Client, "id" | "name">[];
+  products: Pick<Product, "id" | "name" | "salePrice">[];
   paymentTypes: PaymentType[];
   statuses: OrderStatus[];
 }

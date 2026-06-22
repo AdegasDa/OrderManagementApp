@@ -73,6 +73,9 @@ model Order {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
+  @@index([orderDate])
+  @@index([clientId])
+  @@index([statusId])
   @@map("orders")
 }
 

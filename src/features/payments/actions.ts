@@ -36,8 +36,12 @@ export async function updatePaymentType(id: string, data: unknown) {
 }
 
 export async function deletePaymentType(id: string) {
-  await prisma.paymentType.delete({ where: { id } });
-  return { success: true };
+  try {
+    await prisma.paymentType.delete({ where: { id } });
+    return { success: true };
+  } catch {
+    return { error: "Não é possível eliminar um tipo de pagamento com encomendas associadas." };
+  }
 }
 
 export async function restorePaymentType(paymentType: PaymentType) {

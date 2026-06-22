@@ -17,6 +17,18 @@ export const orderSchema = z.object({
   deliveryFee:   z.number().min(0).default(0),
   notes:         z.string().optional(),
   deliveryNotes: z.string().optional(),
+}).refine(
+  (d) => d.advanceAmount <= d.totalValue,
+  { message: "O adiantamento não pode ser maior que o valor total", path: ["advanceAmount"] }
+);
+
+/** Allowlist schema for quick-field updates — only pickupHour and statusId are permitted. */
+export const quickFieldsSchema = z.object({
+  pickupHour: z.string()
+    .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Formato inválido (HH:MM)")
+    .nullable()
+    .optional(),
+  statusId: z.string().min(1).optional(),
 });
 
 export type OrderFormValues = z.infer<typeof orderSchema>;

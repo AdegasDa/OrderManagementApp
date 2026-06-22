@@ -2,7 +2,7 @@
 
 import { del } from "@vercel/blob";
 import { prisma, toDate, fromDate } from "@/lib/prisma";
-import { orderSchema } from "./schema";
+import { orderSchema, quickFieldsSchema } from "./schema";
 import type { OrderWithRelations, OrderPhoto, OrderProduct } from "@/lib/types";
 
 const include = {
@@ -55,11 +55,13 @@ const SORT_MAP: Record<string, object> = {
 export async function getOrders(filters?: {
   statusId?: string; orderNumber?: number;
   dateFrom?: string; dateTo?: string; sortBy?: string;
+  clientName?: string;
 }): Promise<OrderWithRelations[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const where: any = {};
   if (filters?.statusId)    where.statusId    = filters.statusId;
   if (filters?.orderNumber) where.orderNumber = filters.orderNumber;
+  if (filters?.clientName)  where.client      = { name: { contains: filters.clientName } };
   if (filters?.dateFrom || filters?.dateTo) {
     where.orderDate = {};
     if (filters?.dateFrom) where.orderDate.gte = toDate(filters.dateFrom);
@@ -67,7 +69,7 @@ export async function getOrders(filters?: {
   }
 
   const orderBy = SORT_MAP[filters?.sortBy ?? "time-asc"] ?? SORT_MAP["time-asc"];
-  const rows = await prisma.order.findMany({ where, orderBy, include });
+  const rows = await prisma.order.findMany({ where, orderBy, include, take: 200 });
   return rows.map(mapOrder);
 }
 
@@ -123,36 +125,36 @@ export async function getOrdersForWeek(days: string[]): Promise<OrderWithRelatio
   return rows.map(mapOrder);
 }
 
-async function nextOrderNumber(): Promise<number> {
-  const last = await prisma.order.findFirst({ orderBy: { orderNumber: "desc" }, select: { orderNumber: true } });
-  return (last?.orderNumber ?? 0) + 1;
-}
-
 export async function createOrder(data: unknown, photoDataUrls: string[] = []) {
   const parsed = orderSchema.safeParse(data);
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors };
 
-  const orderNumber = await nextOrderNumber();
+  // Use a transaction to atomically read the current max orderNumber and create the order,
+  // preventing race conditions with concurrent submissions.
+  const order = await prisma.$transaction(async (tx) => {
+    const last = await tx.order.findFirst({ orderBy: { orderNumber: "desc" }, select: { orderNumber: true } });
+    const orderNumber = (last?.orderNumber ?? 0) + 1;
 
-  const order = await prisma.order.create({
-    data: {
-      orderNumber,
-      orderDate:     toDate(parsed.data.orderDate),
-      clientId:      parsed.data.clientId,
-      paymentTypeId: parsed.data.paymentTypeId,
-      statusId:      parsed.data.statusId,
-      totalValue:    parsed.data.totalValue,
-      advanceAmount: parsed.data.advanceAmount ?? 0,
-      deliveryFee:   parsed.data.deliveryFee ?? 0,
-      notes:         parsed.data.notes || null,
-      deliveryNotes: parsed.data.deliveryNotes || null,
-      orderProducts: {
-        create: parsed.data.products.map(({ productId, quantity }) => ({ productId, quantity })),
+    return tx.order.create({
+      data: {
+        orderNumber,
+        orderDate:     toDate(parsed.data.orderDate),
+        clientId:      parsed.data.clientId,
+        paymentTypeId: parsed.data.paymentTypeId,
+        statusId:      parsed.data.statusId,
+        totalValue:    parsed.data.totalValue,
+        advanceAmount: parsed.data.advanceAmount ?? 0,
+        deliveryFee:   parsed.data.deliveryFee ?? 0,
+        notes:         parsed.data.notes || null,
+        deliveryNotes: parsed.data.deliveryNotes || null,
+        orderProducts: {
+          create: parsed.data.products.map(({ productId, quantity }) => ({ productId, quantity })),
+        },
+        photos: {
+          create: photoDataUrls.map((filePath) => ({ filePath })),
+        },
       },
-      photos: {
-        create: photoDataUrls.map((filePath) => ({ filePath })),
-      },
-    },
+    });
   });
 
   return { success: true, id: order.id };
@@ -189,6 +191,13 @@ export async function updateOrder(id: string, data: unknown, newPhotoDataUrls: s
 }
 
 export async function deleteOrder(id: string) {
+  // Delete blobs before removing the DB record to avoid orphaned files
+  const photos = await prisma.orderPhoto.findMany({ where: { orderId: id }, select: { filePath: true } });
+  const blobUrls = photos.map((p) => p.filePath).filter((u) => u.startsWith("https://"));
+  if (blobUrls.length > 0) {
+    await del(blobUrls).catch((err) => console.error("[deleteOrder] blob delete error:", err));
+  }
+
   await prisma.order.delete({ where: { id } });
   return { success: true };
 }
@@ -207,7 +216,18 @@ export async function updateOrderDay(id: string, newDate: string) {
   return { success: true };
 }
 
-export async function updateOrderQuickFields(id: string, fields: { pickupHour?: string | null; statusId?: string }) {
-  await prisma.order.update({ where: { id }, data: fields });
+export async function updateOrderQuickFields(
+  id: string,
+  fields: { pickupHour?: string | null; statusId?: string }
+) {
+  // Validate against an explicit allowlist schema — never pass raw client fields to Prisma
+  const parsed = quickFieldsSchema.safeParse(fields);
+  if (!parsed.success) return { error: "Dados inválidos." };
+
+  const data: { pickupHour?: string | null; statusId?: string } = {};
+  if ("pickupHour" in parsed.data) data.pickupHour = parsed.data.pickupHour ?? null;
+  if (parsed.data.statusId)        data.statusId   = parsed.data.statusId;
+
+  await prisma.order.update({ where: { id }, data });
   return { success: true };
 }

@@ -20,12 +20,12 @@ export function DayOrders({ selectedDate }: Props) {
 
   useEffect(() => {
     if (!selectedDate) return;
-    // Only setState in async callbacks — avoids sync setState in effect body
     let alive = true;
+    setState({ loading: true, orders: [] });
     getOrdersByDate(selectedDate).then((data) => {
       if (alive) setState({ loading: false, orders: data });
     });
-    return () => { alive = false; setState((s) => ({ ...s, loading: false })); };
+    return () => { alive = false; };
   }, [selectedDate]);
 
   if (!selectedDate) return null;

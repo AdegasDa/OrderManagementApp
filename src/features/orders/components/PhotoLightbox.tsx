@@ -15,9 +15,10 @@ interface Props {
   onClose: () => void;
   onPrev: () => void;
   onNext: () => void;
+  onGoTo?: (i: number) => void;
 }
 
-export function PhotoLightbox({ photos, index, onClose, onPrev, onNext }: Props) {
+export function PhotoLightbox({ photos, index, onClose, onPrev, onNext, onGoTo }: Props) {
   const total = photos.length;
   const current = photos[index];
 
@@ -111,6 +112,7 @@ export function PhotoLightbox({ photos, index, onClose, onPrev, onNext }: Props)
               type="button"
               key={i}
               onClick={() => {
+                if (onGoTo) { onGoTo(i); return; }
                 if (i < index) onPrev();
                 else if (i > index) onNext();
               }}

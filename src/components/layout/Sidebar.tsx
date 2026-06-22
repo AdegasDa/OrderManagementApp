@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  ClipboardList, Calendar, Users, Package, CreditCard, Tag, Sun, Moon,
+  ClipboardList, Calendar, Users, Package, CreditCard, Tag, Sun, Moon, LogOut,
 } from "lucide-react";
 import { useTheme } from "next-themes";
+import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -44,7 +45,7 @@ export function Sidebar() {
           </Link>
         ))}
       </nav>
-      <div className="p-3 border-t">
+      <div className="p-3 border-t space-y-1">
         <Button
           variant="ghost"
           size="sm"
@@ -53,6 +54,15 @@ export function Sidebar() {
         >
           {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
           {theme === "dark" ? "Modo Claro" : "Modo Escuro"}
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive"
+          onClick={() => signOut({ callbackUrl: "/login" })}
+        >
+          <LogOut size={18} />
+          Terminar Sessão
         </Button>
       </div>
     </aside>

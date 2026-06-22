@@ -36,8 +36,12 @@ export async function updateClient(id: string, data: unknown) {
 }
 
 export async function deleteClient(id: string) {
-  await prisma.client.delete({ where: { id } });
-  return { success: true };
+  try {
+    await prisma.client.delete({ where: { id } });
+    return { success: true };
+  } catch {
+    return { error: "Não é possível eliminar um cliente com encomendas associadas." };
+  }
 }
 
 export async function restoreClient(client: Client) {

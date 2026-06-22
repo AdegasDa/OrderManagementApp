@@ -36,8 +36,12 @@ export async function updateOrderStatus(id: string, data: unknown) {
 }
 
 export async function deleteOrderStatus(id: string) {
-  await prisma.orderStatus.delete({ where: { id } });
-  return { success: true };
+  try {
+    await prisma.orderStatus.delete({ where: { id } });
+    return { success: true };
+  } catch {
+    return { error: "Não é possível eliminar um estado com encomendas associadas." };
+  }
 }
 
 export async function restoreOrderStatus(status: OrderStatus) {

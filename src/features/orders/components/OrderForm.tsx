@@ -429,6 +429,7 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
                 onClose={() => setLightboxIndex(null)}
                 onPrev={() => setLightboxIndex((i) => (i! - 1 + allPhotos.length) % allPhotos.length)}
                 onNext={() => setLightboxIndex((i) => (i! + 1) % allPhotos.length)}
+                onGoTo={(i) => setLightboxIndex(i)}
               />
             )}
             {allPhotos.length > 0 && (
@@ -481,7 +482,10 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
 
         {/* ── Actions ──────────────────────────────────────────────────── */}
         <div className="flex flex-col-reverse sm:flex-row gap-3 pt-2 pb-6">
-          <Button type="button" variant="outline" size="lg" className="sm:w-auto w-full h-12 text-base px-6" onClick={() => router.back()}>
+          <Button type="button" variant="outline" size="lg" className="sm:w-auto w-full h-12 text-base px-6" onClick={() => {
+            if (form.formState.isDirty && !confirm("Tem alterações não guardadas. Deseja sair?")) return;
+            router.back();
+          }}>
             <ArrowLeft size={18} /> Cancelar
           </Button>
           <Button type="submit" size="lg" className="sm:w-auto w-full h-12 text-base px-6" disabled={form.formState.isSubmitting}>

@@ -36,8 +36,12 @@ export async function updateProduct(id: string, data: unknown) {
 }
 
 export async function deleteProduct(id: string) {
-  await prisma.product.delete({ where: { id } });
-  return { success: true };
+  try {
+    await prisma.product.delete({ where: { id } });
+    return { success: true };
+  } catch {
+    return { error: "Não é possível eliminar um produto que está associado a encomendas." };
+  }
 }
 
 export async function restoreProduct(product: Product) {

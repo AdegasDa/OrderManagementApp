@@ -40,7 +40,7 @@ export async function POST(request: Request) {
         const safeName = file.name
           .replace(/[^a-zA-Z0-9._-]/g, "_")
           .slice(0, 100);
-        return put(safeName, file, { access: "private", addRandomSuffix: true }).then((r) => r.url);
+        return put(safeName, file, { access: "public", addRandomSuffix: true }).then((r) => r.url);
       })
     );
 

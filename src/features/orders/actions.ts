@@ -1,5 +1,6 @@
 "use server";
 
+import { del } from "@vercel/blob";
 import { prisma, toDate, fromDate } from "@/lib/prisma";
 import { orderSchema } from "./schema";
 import type { OrderWithRelations, OrderPhoto, OrderProduct } from "@/lib/types";
@@ -193,7 +194,11 @@ export async function deleteOrder(id: string) {
 }
 
 export async function deleteOrderPhoto(id: string) {
+  const photo = await prisma.orderPhoto.findUnique({ where: { id }, select: { filePath: true } });
   await prisma.orderPhoto.delete({ where: { id } });
+  if (photo?.filePath && photo.filePath.startsWith("https://")) {
+    await del(photo.filePath).catch(() => {});
+  }
   return { success: true };
 }
 

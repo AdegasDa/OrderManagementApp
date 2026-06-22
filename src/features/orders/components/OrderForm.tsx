@@ -98,17 +98,13 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
   }
 
   async function uploadFiles(): Promise<string[]> {
-    return Promise.all(
-      newFiles.map(
-        (f) =>
-          new Promise<string>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = reject;
-            reader.readAsDataURL(f);
-          })
-      )
-    );
+    if (newFiles.length === 0) return [];
+    const formData = new FormData();
+    newFiles.forEach((f) => formData.append("file", f));
+    const res = await fetch("/api/upload", { method: "POST", body: formData });
+    if (!res.ok) throw new Error("Erro ao fazer upload das fotos.");
+    const { urls } = await res.json() as { urls: string[] };
+    return urls;
   }
 
   async function onSubmit(values: OrderFormValues) {

@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import { getClients } from "@/features/clients/actions";
 import { getProducts } from "@/features/products/actions";
 import { getPaymentTypes } from "@/features/payments/actions";
@@ -7,7 +5,7 @@ import { getOrderStatuses } from "@/features/statuses/actions";
 import { OrderForm } from "@/features/orders/components/OrderForm";
 
 export default async function NewOrderPage() {
-  const [clients, products, paymentTypes, statuses] = await Promise.all([
+  const [{ items: clients }, { items: products }, paymentTypes, statuses] = await Promise.all([
     getClients(), getProducts(), getPaymentTypes(), getOrderStatuses(),
   ]);
 

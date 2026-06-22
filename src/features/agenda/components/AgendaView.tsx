@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { AgendaCalendar } from "./AgendaCalendar";
+import dynamic from "next/dynamic";
+const AgendaCalendar = dynamic(() => import("./AgendaCalendar").then((m) => m.AgendaCalendar), { ssr: false });
 import { DayOrders } from "./DayOrders";
 import { getOrderCountsByMonth } from "@/features/orders/actions";
 

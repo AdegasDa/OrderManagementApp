@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { statusSchema } from "./schema";
 import type { OrderStatus } from "@/lib/types";
@@ -18,6 +19,7 @@ export async function createOrderStatus(data: unknown) {
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors };
   try {
     await prisma.orderStatus.create({ data: parsed.data });
+    revalidatePath("/statuses");
     return { success: true };
   } catch {
     return { error: "Já existe um estado com este nome." };
@@ -29,6 +31,7 @@ export async function updateOrderStatus(id: string, data: unknown) {
   if (!parsed.success) return { error: parsed.error.flatten().fieldErrors };
   try {
     await prisma.orderStatus.update({ where: { id }, data: parsed.data });
+    revalidatePath("/statuses");
     return { success: true };
   } catch {
     return { error: "Já existe um estado com este nome." };
@@ -38,6 +41,7 @@ export async function updateOrderStatus(id: string, data: unknown) {
 export async function deleteOrderStatus(id: string) {
   try {
     await prisma.orderStatus.delete({ where: { id } });
+    revalidatePath("/statuses");
     return { success: true };
   } catch {
     return { error: "Não é possível eliminar um estado com encomendas associadas." };
@@ -52,5 +56,6 @@ export async function restoreOrderStatus(status: OrderStatus) {
       create: { id: status.id, name: status.name, color: status.color },
     });
   } catch { /* name conflict — ignore */ }
+  revalidatePath("/statuses");
   return { success: true };
 }

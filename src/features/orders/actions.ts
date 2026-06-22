@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { del } from "@vercel/blob";
 import { prisma, toDate, fromDate } from "@/lib/prisma";
 import { orderSchema, quickFieldsSchema } from "./schema";
@@ -52,11 +53,16 @@ const SORT_MAP: Record<string, object> = {
   "status":   { status: { name: "asc" } },
 };
 
-export async function getOrders(filters?: {
-  statusId?: string; orderNumber?: number;
-  dateFrom?: string; dateTo?: string; sortBy?: string;
-  clientName?: string;
-}): Promise<OrderWithRelations[]> {
+const ORDER_PAGE_SIZE = 50;
+
+export async function getOrders(
+  filters?: {
+    statusId?: string; orderNumber?: number;
+    dateFrom?: string; dateTo?: string; sortBy?: string;
+    clientName?: string;
+  },
+  page = 0,
+): Promise<{ items: OrderWithRelations[]; total: number }> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const where: any = {};
   if (filters?.statusId)    where.statusId    = filters.statusId;
@@ -69,8 +75,11 @@ export async function getOrders(filters?: {
   }
 
   const orderBy = SORT_MAP[filters?.sortBy ?? "time-asc"] ?? SORT_MAP["time-asc"];
-  const rows = await prisma.order.findMany({ where, orderBy, include, take: 200 });
-  return rows.map(mapOrder);
+  const [rows, total] = await Promise.all([
+    prisma.order.findMany({ where, orderBy, include, take: ORDER_PAGE_SIZE, skip: page * ORDER_PAGE_SIZE }),
+    prisma.order.count({ where }),
+  ]);
+  return { items: rows.map(mapOrder), total };
 }
 
 export async function getOrderById(id: string): Promise<OrderWithRelations | null> {
@@ -93,21 +102,19 @@ export async function getOrdersByDate(date: string): Promise<OrderWithRelations[
 }
 
 export async function getOrderCountsByMonth(year: number, month: number): Promise<Record<string, number>> {
-  const start = toDate(`${year}-${String(month).padStart(2, "0")}-01`);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const start = `${year}-${pad(month)}-01T00:00:00.000Z`;
   const lastDay = new Date(year, month, 0).getDate();
-  const end = new Date(`${year}-${String(month).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}T23:59:59.999Z`);
+  const end = `${year}-${pad(month)}-${pad(lastDay)}T23:59:59.999Z`;
 
-  const rows = await prisma.order.findMany({
-    where: { orderDate: { gte: start, lte: end } },
-    select: { orderDate: true },
-  });
+  const rows = await prisma.$queryRaw<{ day: string; count: bigint }[]>`
+    SELECT strftime('%Y-%m-%d', "orderDate") AS day, COUNT(*) AS count
+    FROM "Order"
+    WHERE "orderDate" >= ${start} AND "orderDate" <= ${end}
+    GROUP BY day
+  `;
 
-  const counts: Record<string, number> = {};
-  for (const r of rows) {
-    const day = fromDate(r.orderDate);
-    counts[day] = (counts[day] ?? 0) + 1;
-  }
-  return counts;
+  return Object.fromEntries(rows.map((r: { day: string; count: bigint }) => [r.day, Number(r.count)]));
 }
 
 export async function getOrdersForWeek(days: string[]): Promise<OrderWithRelations[]> {
@@ -157,6 +164,7 @@ export async function createOrder(data: unknown, photoDataUrls: string[] = []) {
     });
   });
 
+  revalidatePath("/orders");
   return { success: true, id: order.id };
 }
 
@@ -187,6 +195,7 @@ export async function updateOrder(id: string, data: unknown, newPhotoDataUrls: s
     },
   });
 
+  revalidatePath("/orders");
   return { success: true };
 }
 
@@ -199,6 +208,7 @@ export async function deleteOrder(id: string) {
   }
 
   await prisma.order.delete({ where: { id } });
+  revalidatePath("/orders");
   return { success: true };
 }
 
@@ -213,6 +223,7 @@ export async function deleteOrderPhoto(id: string) {
 
 export async function updateOrderDay(id: string, newDate: string) {
   await prisma.order.update({ where: { id }, data: { orderDate: toDate(newDate) } });
+  revalidatePath("/orders");
   return { success: true };
 }
 
@@ -229,5 +240,6 @@ export async function updateOrderQuickFields(
   if (parsed.data.statusId)        data.statusId   = parsed.data.statusId;
 
   await prisma.order.update({ where: { id }, data });
+  revalidatePath("/orders");
   return { success: true };
 }

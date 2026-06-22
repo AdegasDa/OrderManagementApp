@@ -76,16 +76,14 @@ export function PhotoLightbox({ photos, index, onClose, onPrev, onNext, onGoTo }
 
       {/* Image */}
       <div
-        className="relative max-h-[85vh] max-w-[85vw] flex items-center justify-center"
+        className="relative w-[85vw] h-[85vh]"
         onClick={(e) => e.stopPropagation()}
       >
         <Image
           src={current.src}
           alt={current.alt ?? `Foto ${index + 1}`}
-          width={1200}
-          height={900}
-          className="rounded-lg object-contain max-h-[85vh] max-w-[85vw] shadow-2xl"
-          style={{ width: "auto", height: "auto" }}
+          fill
+          className="rounded-lg object-contain shadow-2xl"
           priority
         />
       </div>

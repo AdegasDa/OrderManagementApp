@@ -10,23 +10,6 @@ import { formatCurrency } from "@/lib/utils";
 import { deleteOrder, updateOrderQuickFields } from "../actions";
 import type { OrderWithRelations, OrderStatus } from "@/lib/types";
 
-const CLOSED_DAYS = new Set([0, 1]);
-
-function toLocalStr(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
-function getWorkingDays(n: number): string[] {
-  const days: string[] = [];
-  const date = new Date();
-  date.setHours(0, 0, 0, 0);
-  while (days.length < n) {
-    if (!CLOSED_DAYS.has(date.getDay())) days.push(toLocalStr(date));
-    date.setDate(date.getDate() + 1);
-  }
-  return days;
-}
-
 function formatDayLabel(dateStr: string): string {
   const date = new Date(dateStr + "T12:00:00");
   const today = new Date();

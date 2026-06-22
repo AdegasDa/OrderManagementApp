@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { X, Upload, Truck, Loader2, Plus, Trash2, ArrowLeft } from "lucide-react";
+import NextImage from "next/image";
 import { PhotoLightbox } from "./PhotoLightbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -455,8 +456,8 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
                   <div key={p.id} className="relative w-24 h-24 group">
                     <button type="button" onClick={() => setLightboxIndex(i)}
                       className="w-full h-full rounded-lg overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                      <img src={photoSrc(p.filePath)} alt={`Foto ${i + 1}`}
-                        className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                      <NextImage src={photoSrc(p.filePath)} alt={`Foto ${i + 1}`} fill
+                        className="object-cover transition-transform group-hover:scale-105" />
                       <span className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg" />
                     </button>
                     <button type="button" onClick={() => setPendingPhotoDelete(p.id)}
@@ -471,6 +472,8 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
                       onClick={() => !form.formState.isSubmitting && setLightboxIndex(photos.length + i)}
                       className="w-full h-full rounded-lg overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       disabled={form.formState.isSubmitting}>
+                      {/* blob: URLs are local-only previews — next/image can't optimize them */}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={src} alt={`Nova foto ${i + 1}`}
                         className="w-full h-full object-cover transition-transform group-hover:scale-105" />
                       <span className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-lg" />

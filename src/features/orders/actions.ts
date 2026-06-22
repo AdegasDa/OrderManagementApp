@@ -208,16 +208,20 @@ export async function updateOrder(id: string, data: unknown, newPhotoDataUrls: s
 }
 
 export async function deleteOrder(id: string) {
-  // Delete blobs before removing the DB record to avoid orphaned files
-  const photos = await prisma.orderPhoto.findMany({ where: { orderId: id }, select: { filePath: true } });
-  const blobUrls = photos.map((p: { filePath: string }) => p.filePath).filter((u: string) => u.startsWith("https://"));
-  if (blobUrls.length > 0) {
-    await del(blobUrls).catch((err) => console.error("[deleteOrder] blob delete error:", err));
-  }
+  try {
+    // Delete blobs before removing the DB record to avoid orphaned files
+    const photos = await prisma.orderPhoto.findMany({ where: { orderId: id }, select: { filePath: true } });
+    const blobUrls = photos.map((p: { filePath: string }) => p.filePath).filter((u: string) => u.startsWith("https://"));
+    if (blobUrls.length > 0) {
+      await del(blobUrls).catch((err) => console.error("[deleteOrder] blob delete error:", err));
+    }
 
-  await prisma.order.delete({ where: { id } });
-  revalidatePath("/orders");
-  return { success: true };
+    await prisma.order.delete({ where: { id } });
+    revalidatePath("/orders");
+    return { success: true };
+  } catch {
+    return { error: "Erro ao eliminar encomenda." };
+  }
 }
 
 export async function deleteOrderPhoto(id: string) {

@@ -170,7 +170,7 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
           <CardContent className="space-y-4">
             <FormField control={form.control} name="orderDate" render={({ field }) => (
               <FormItem>
-                <FormControl><Input type="date" className="w-full h-12 text-base px-4 cursor-pointer text-center" onClick={(e) => { try { (e.target as HTMLInputElement).showPicker(); } catch { /* unsupported */ } }} {...field} /></FormControl>
+                <FormControl><Input type="date" className="w-full h-12 text-base px-4 cursor-pointer" onClick={(e) => { try { (e.target as HTMLInputElement).showPicker(); } catch { /* unsupported */ } }} {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />

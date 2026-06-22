@@ -112,7 +112,7 @@ export async function getOrderCountsByMonth(year: number, month: number): Promis
 
   const rows = await prisma.$queryRaw<{ day: string; count: bigint }[]>`
     SELECT strftime('%Y-%m-%d', "orderDate") AS day, COUNT(*) AS count
-    FROM "Order"
+    FROM "orders"
     WHERE "orderDate" >= ${start} AND "orderDate" <= ${end}
     GROUP BY day
   `;

@@ -14,6 +14,7 @@ export type ClientOption = {
   name: string;
   phone: string;
   source: string;
+  socialHandle: string | null;
 };
 
 interface Props {
@@ -88,7 +89,7 @@ export function ClientCombobox({ clients, value, onChange, placeholder = "Seleci
               <CommandItem
                 key={c.id}
                 value={c.id}
-                keywords={[c.name, c.phone, c.source, SOURCE_LABELS[c.source] ?? ""]}
+                keywords={[c.name, c.phone, c.source, SOURCE_LABELS[c.source] ?? "", c.socialHandle ?? ""]}
                 onSelect={(val) => {
                   onChange(val === value ? "" : val);
                   setOpen(false);
@@ -98,6 +99,7 @@ export function ClientCombobox({ clients, value, onChange, placeholder = "Seleci
                   <span className="font-medium truncate">{c.name}</span>
                   <span className="text-xs text-muted-foreground truncate">
                     {c.phone} · {SOURCE_LABELS[c.source] ?? c.source}
+                    {c.socialHandle && <> · @{c.socialHandle}</>}
                   </span>
                 </div>
                 <Check className={cn("ml-2 h-4 w-4 shrink-0", value === c.id ? "opacity-100" : "opacity-0")} />

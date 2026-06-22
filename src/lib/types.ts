@@ -3,6 +3,7 @@ export type Client = {
   name: string;
   phone: string;
   source: string;
+  socialHandle: string | null;
   createdAt: string;
   updatedAt: string;
 };

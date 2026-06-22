@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { clientSchema } from "./schema";
 import type { Client } from "@/lib/types";
 
-function serialize(c: { id: string; name: string; phone: string; source: string; createdAt: Date; updatedAt: Date }): Client {
+function serialize(c: { id: string; name: string; phone: string; source: string; socialHandle: string | null; createdAt: Date; updatedAt: Date }): Client {
   return { ...c, createdAt: c.createdAt.toISOString(), updatedAt: c.updatedAt.toISOString() };
 }
 
@@ -20,10 +20,10 @@ export async function getClients(page = 0): Promise<{ items: Client[]; total: nu
 }
 
 /** Returns all clients (id + name only) for form dropdowns — no pagination. */
-export async function getAllClients(): Promise<Pick<Client, "id" | "name" | "phone" | "source">[]> {
+export async function getAllClients(): Promise<Pick<Client, "id" | "name" | "phone" | "source" | "socialHandle">[]> {
   return prisma.client.findMany({
     orderBy: { name: "asc" },
-    select: { id: true, name: true, phone: true, source: true },
+    select: { id: true, name: true, phone: true, source: true, socialHandle: true },
   });
 }
 
@@ -65,7 +65,7 @@ export async function restoreClient(client: Client) {
   await prisma.client.upsert({
     where: { id: client.id },
     update: {},
-    create: { id: client.id, name: client.name, phone: client.phone, source: client.source },
+    create: { id: client.id, name: client.name, phone: client.phone, source: client.source, socialHandle: client.socialHandle },
   });
   revalidatePath("/clients");
   return { success: true };

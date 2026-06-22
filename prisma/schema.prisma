@@ -8,11 +8,12 @@ datasource db {
 }
 
 model Client {
-  id        String       @id @default(cuid())
-  name      String
-  phone     String
-  source    String       @default("STORE")
-  orders    Order[]
+  id           String       @id @default(cuid())
+  name         String
+  phone        String
+  source       String       @default("STORE")
+  socialHandle String?
+  orders       Order[]
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
 

@@ -173,7 +173,7 @@ export function OrderForm({ clients, products, paymentTypes, statuses, order }: 
                 <FormControl>
                   <input
                     type="date"
-                    className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+                    className="w-full appearance-none rounded-lg border border-input bg-transparent px-3 py-2 text-sm text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/50 dark:bg-input/30 dark:[color-scheme:dark]"
                     {...field}
                   />
                 </FormControl>

@@ -63,13 +63,13 @@ export function ClientForm({ client, onSuccess }: Props) {
         )} />
         <FormField control={form.control} name="phone" render={({ field }) => (
           <FormItem>
-            <FormLabel>Telefone</FormLabel>
+            <FormLabel>Telefone <span className="text-muted-foreground font-normal">(opcional)</span></FormLabel>
             <FormControl>
               <Input
                 placeholder="+351 900 000 000"
                 inputMode="tel"
                 maxLength={17}
-                value={field.value}
+                value={field.value ?? ""}
                 onChange={(e) => field.onChange(formatPhone(e.target.value))}
               />
             </FormControl>

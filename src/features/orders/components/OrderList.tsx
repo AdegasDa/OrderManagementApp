@@ -87,12 +87,10 @@ export function OrderList({ orders: initial }: { orders: OrderWithRelations[] })
               </div>
 
               <p className="font-semibold text-sm leading-tight">{o.client.name}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {formatDate(o.orderDate)}
-                {(o.client.phone || o.client.socialHandle) && (
-                  <> · {o.client.phone || o.client.socialHandle}</>
-                )}
-              </p>
+              {(o.client.phone || o.client.socialHandle) && (
+                <p className="text-xs text-muted-foreground leading-tight">{o.client.phone || o.client.socialHandle}</p>
+              )}
+              <p className="text-xs text-muted-foreground mt-0.5">{formatDate(o.orderDate)}</p>
 
               <div className="flex items-center justify-between gap-2 mt-1">
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground min-w-0">

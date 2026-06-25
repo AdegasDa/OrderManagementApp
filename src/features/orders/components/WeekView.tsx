@@ -144,6 +144,9 @@ export function WeekView({ orders: initial, statuses, workingDays, sortBy = "tim
                             <span className="font-mono text-xs font-bold text-muted-foreground">#{o.orderNumber}</span>
                           </div>
                           <p className="font-semibold text-sm leading-tight">{o.client.name}</p>
+                          {(o.client.phone || o.client.socialHandle) && (
+                            <p className="text-xs text-muted-foreground leading-tight">{o.client.phone || o.client.socialHandle}</p>
+                          )}
                           <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
                             <span className="truncate">{o.orderProducts.map((op) => op.product.name).join(", ")}</span>
                             {o.deliveryFee > 0 && (

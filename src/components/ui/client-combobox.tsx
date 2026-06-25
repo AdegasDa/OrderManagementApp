@@ -12,7 +12,7 @@ import {
 export type ClientOption = {
   id: string;
   name: string;
-  phone: string;
+  phone: string | null;
   source: string;
   socialHandle: string | null;
 };
@@ -89,7 +89,7 @@ export function ClientCombobox({ clients, value, onChange, placeholder = "Seleci
               <CommandItem
                 key={c.id}
                 value={c.id}
-                keywords={[c.name, c.phone, c.source, SOURCE_LABELS[c.source] ?? "", c.socialHandle ?? ""]}
+                keywords={[c.name, c.phone ?? "", c.source, SOURCE_LABELS[c.source] ?? "", c.socialHandle ?? ""]}
                 onSelect={(val) => {
                   onChange(val === value ? "" : val);
                   setOpen(false);
@@ -98,7 +98,7 @@ export function ClientCombobox({ clients, value, onChange, placeholder = "Seleci
                 <div className="flex flex-col min-w-0 flex-1">
                   <span className="font-medium truncate">{c.name}</span>
                   <span className="text-xs text-muted-foreground truncate">
-                    {c.phone} · {SOURCE_LABELS[c.source] ?? c.source}
+                    {c.phone ? <>{c.phone} · </> : null}{SOURCE_LABELS[c.source] ?? c.source}
                     {c.socialHandle && <> · @{c.socialHandle}</>}
                   </span>
                 </div>

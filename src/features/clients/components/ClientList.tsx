@@ -89,7 +89,7 @@ export function ClientList({ clients: initial }: { clients: Client[] }) {
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-sm truncate">{c.name}</p>
               <div className="flex items-center gap-2 mt-1 flex-wrap">
-                <span className="text-xs text-muted-foreground">{c.phone}</span>
+                {c.phone && <span className="text-xs text-muted-foreground">{c.phone}</span>}
                 <Badge variant="secondary" className="text-xs">{sourceLabels[c.source] ?? c.source}</Badge>
                 {c.socialHandle && (
                   <span className="text-xs text-muted-foreground">@{c.socialHandle}</span>
@@ -129,7 +129,7 @@ export function ClientList({ clients: initial }: { clients: Client[] }) {
             {clients.map((c) => (
               <TableRow key={c.id}>
                 <TableCell className="font-medium">{c.name}</TableCell>
-                <TableCell>{c.phone}</TableCell>
+                <TableCell>{c.phone ?? <span className="text-muted-foreground">—</span>}</TableCell>
                 <TableCell>
                   <Badge variant="secondary">{sourceLabels[c.source] ?? c.source}</Badge>
                 </TableCell>

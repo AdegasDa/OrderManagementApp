@@ -1,7 +1,7 @@
 export type Client = {
   id: string;
   name: string;
-  phone: string;
+  phone: string | null;
   source: string;
   socialHandle: string | null;
   createdAt: string;

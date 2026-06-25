@@ -2,9 +2,9 @@ import { z } from "zod";
 
 export const clientSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
-  phone: z.string().min(1, "Telefone é obrigatório"),
+  phone: z.preprocess(v => (v === "" || v == null) ? null : v, z.string().nullable()),
   source: z.enum(["STORE", "INSTAGRAM", "WHATSAPP"]),
-  socialHandle: z.string().transform(v => v || undefined).optional(),
+  socialHandle: z.preprocess(v => (v === "" || v == null) ? null : v, z.string().nullable()),
 });
 
 export type ClientFormValues = z.infer<typeof clientSchema>;

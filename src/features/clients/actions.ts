@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { clientSchema } from "./schema";
 import type { Client } from "@/lib/types";
 
-function serialize(c: { id: string; name: string; phone: string; source: string; socialHandle: string | null; createdAt: Date; updatedAt: Date }): Client {
+function serialize(c: { id: string; name: string; phone: string | null; source: string; socialHandle: string | null; createdAt: Date; updatedAt: Date }): Client {
   return { ...c, createdAt: c.createdAt.toISOString(), updatedAt: c.updatedAt.toISOString() };
 }
 
